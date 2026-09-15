@@ -346,10 +346,10 @@ T20 -> T21
 
 **Done when**:
 
-- [ ] Active nav state works; Sair calls logout; theme toggle wired
-- [ ] RTL tests cover nav targets and logout click
-- [ ] Gate check passes: `npm test`
-- [ ] Test count: ≥2 tests pass
+- [x] Active nav state works; Sair calls logout; theme toggle wired
+- [x] RTL tests cover nav targets and logout click
+- [x] Gate check passes: `npm test`
+- [x] Test count: ≥2 tests pass
 
 **Tests**: unit
 **Gate**: full

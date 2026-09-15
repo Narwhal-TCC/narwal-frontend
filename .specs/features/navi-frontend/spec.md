@@ -225,8 +225,8 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 | NAVI-27 | P1: Histórico | Design | Pending |
 | NAVI-28 | P1: Histórico | Design | Pending |
 | NAVI-29 | P1: Histórico | Design | Pending |
-| NAVI-30 | P2: Shell navigation | Design | Pending |
-| NAVI-31 | P2: Shell navigation | Design | Pending |
+| NAVI-30 | P2: Shell navigation | Design | Implementing |
+| NAVI-31 | P2: Shell navigation | Design | Implementing |
 
 **ID format:** `NAVI-[NUMBER]`
 
