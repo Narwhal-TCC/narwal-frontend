@@ -372,10 +372,10 @@ T20 -> T21
 
 **Done when**:
 
-- [ ] Route table matches design paths
-- [ ] Unauth visiting `/` redirects to login
-- [ ] Gate check passes: `npm test`
-- [ ] Test count: ≥1 router smoke test pass
+- [x] Route table matches design paths
+- [x] Unauth visiting `/` redirects to login
+- [x] Gate check passes: `npm test`
+- [x] Test count: ≥1 router smoke test pass
 
 **Tests**: unit
 **Gate**: full
