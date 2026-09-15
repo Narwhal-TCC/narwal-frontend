@@ -1,8 +1,14 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { FILE_TOO_LARGE_MESSAGE, INVALID_TYPE_MESSAGE } from '../domain/uploadValidation'
 import { NovaAnalisePage } from './NovaAnalisePage'
+
+vi.mock('../api/analyses', () => ({
+  createAnalysis: vi.fn(),
+}))
+
+import { createAnalysis } from '../api/analyses'
 
 function renderNova(initialPath = '/analises/nova') {
   return render(
@@ -21,6 +27,10 @@ function createFile(name: string, type: string, sizeBytes: number): File {
 }
 
 describe('NovaAnalisePage', () => {
+  beforeEach(() => {
+    vi.mocked(createAnalysis).mockReset()
+  })
+
   it('rejects a non-image file type', async () => {
     renderNova()
     const input = document.querySelector('input[type="file"]') as HTMLInputElement
@@ -30,6 +40,7 @@ describe('NovaAnalisePage', () => {
     })
 
     expect(await screen.findByRole('alert')).toHaveTextContent(INVALID_TYPE_MESSAGE)
+    expect(createAnalysis).not.toHaveBeenCalled()
   })
 
   it('rejects a file larger than 10 MB', async () => {
@@ -43,6 +54,7 @@ describe('NovaAnalisePage', () => {
     })
 
     expect(await screen.findByRole('alert')).toHaveTextContent(FILE_TOO_LARGE_MESSAGE)
+    expect(createAnalysis).not.toHaveBeenCalled()
   })
 
   it('accepts a valid PNG and navigates to loading', async () => {

@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { LoadingPage } from './LoadingPage'
+import { NovaAnalisePage } from './NovaAnalisePage'
 
 vi.mock('../api/analyses', () => ({
   createAnalysis: vi.fn(),
@@ -15,7 +16,7 @@ function renderLoading(initialEntries: { pathname: string; state?: unknown }[]) 
     <MemoryRouter initialEntries={initialEntries}>
       <Routes>
         <Route path="/analises/loading" element={<LoadingPage />} />
-        <Route path="/analises/nova" element={<div>Nova Page</div>} />
+        <Route path="/analises/nova" element={<NovaAnalisePage />} />
         <Route path="/analises/:id" element={<div>Result Page</div>} />
       </Routes>
     </MemoryRouter>,
@@ -34,7 +35,7 @@ describe('LoadingPage', () => {
   it('redirects to nova when no pending file is available', async () => {
     renderLoading([{ pathname: '/analises/loading' }])
 
-    expect(await screen.findByText('Nova Page')).toBeInTheDocument()
+    expect(await screen.findByText('Enviar imagem de sonar')).toBeInTheDocument()
   })
 
   it('navigates to resultado on successful upload', async () => {
@@ -69,7 +70,7 @@ describe('LoadingPage', () => {
     renderLoading([{ pathname: '/analises/loading', state: { file: createFile() } }])
 
     await waitFor(() => {
-      expect(screen.getByText('Nova Page')).toBeInTheDocument()
+      expect(screen.getByRole('alert')).toHaveTextContent('Imagem inválida.')
     })
   })
 

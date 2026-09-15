@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useSearchParams } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ACCESS_TOKEN_KEY } from './token'
@@ -10,6 +10,7 @@ vi.mock('../api/auth', () => ({
   me: vi.fn(),
 }))
 
+import { ApiError } from '../api/client'
 import { me as meApi } from '../api/auth'
 
 const mockProfile = {
@@ -55,6 +56,20 @@ describe('ProtectedRoute', () => {
 
     expect(await screen.findByText('Login Page')).toBeInTheDocument()
     expect(screen.getByTestId('next-path')).toHaveTextContent('/')
+  })
+
+  it('redirects to login and clears token when me returns UNAUTHORIZED', async () => {
+    localStorage.setItem(ACCESS_TOKEN_KEY, 'stale-token')
+    vi.mocked(meApi).mockRejectedValue(
+      new ApiError('UNAUTHORIZED', 'Sessão expirada.', 401),
+    )
+
+    renderProtectedRoutes('/')
+
+    await waitFor(() => {
+      expect(screen.getByText('Login Page')).toBeInTheDocument()
+    })
+    expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBeNull()
   })
 
   it('renders protected content when authenticated', async () => {

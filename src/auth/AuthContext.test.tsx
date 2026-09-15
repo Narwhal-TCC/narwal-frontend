@@ -65,6 +65,22 @@ describe('AuthContext', () => {
     expect(result.current.user).toBeNull()
   })
 
+  it('clears token when me returns UNAUTHORIZED', async () => {
+    localStorage.setItem(ACCESS_TOKEN_KEY, 'stale-token')
+    vi.mocked(meApi).mockRejectedValue(
+      new ApiError('UNAUTHORIZED', 'Sessão expirada.', 401),
+    )
+
+    const { result } = renderAuthHook()
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+
+    expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBeNull()
+    expect(result.current.user).toBeNull()
+  })
+
   it('failed login keeps user logged out and does not store token', async () => {
     vi.mocked(loginApi).mockRejectedValue(
       new ApiError('INVALID_CREDENTIALS', 'Credenciais inválidas', 401),

@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ACCESS_TOKEN_KEY } from '../auth/token'
 import { AuthProvider } from '../auth/AuthContext'
@@ -24,7 +24,10 @@ function renderSidebar(initialPath = '/') {
     <ThemeProvider>
       <AuthProvider>
         <MemoryRouter initialEntries={[initialPath]}>
-          <Sidebar />
+          <Routes>
+            <Route path="/" element={<Sidebar />} />
+            <Route path="/login" element={<div>Login Page</div>} />
+          </Routes>
         </MemoryRouter>
       </AuthProvider>
     </ThemeProvider>,
@@ -50,11 +53,18 @@ describe('Sidebar', () => {
     expect(screen.getByRole('link', { name: /Histórico/i })).toHaveAttribute('href', '/historico')
   })
 
-  it('calls logout when Sair is clicked', () => {
+  it('shows operator identity from auth profile', async () => {
+    renderSidebar()
+
+    expect(await screen.findByText('operador-1')).toBeInTheDocument()
+  })
+
+  it('clears token and navigates to login when Sair is clicked', async () => {
     renderSidebar()
 
     fireEvent.click(screen.getByRole('button', { name: /Sair/i }))
 
     expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBeNull()
+    expect(await screen.findByText('Login Page')).toBeInTheDocument()
   })
 })

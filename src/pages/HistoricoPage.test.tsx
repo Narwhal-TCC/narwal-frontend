@@ -75,6 +75,37 @@ describe('HistoricoPage', () => {
     expect(screen.getByText('bbbbbbbb')).toBeInTheDocument()
   })
 
+  it('filters to analyses with NOMBO detections', async () => {
+    vi.mocked(listAnalyses).mockResolvedValue({
+      items: [summaryA, summaryB],
+      limit: 50,
+      offset: 0,
+    })
+    vi.mocked(getAnalysis).mockImplementation(async (id: string) => ({
+      id,
+      org_id: 'org',
+      user_id: 'user',
+      status: 'succeeded',
+      detections:
+        id === summaryA.id
+          ? [{ x1: 0, y1: 0, x2: 1, y2: 1, confidence: 0.9, label: 'a' }]
+          : [{ x1: 0, y1: 0, x2: 1, y2: 1, confidence: 0.5, label: 'b' }],
+      image_content_type: 'image/png',
+      image_s3_key: 'key',
+      image_url: null,
+      created_at: summaryA.created_at,
+      inference_ms: 100,
+    }))
+
+    renderHistorico()
+    await screen.findByText('aaaaaaaa')
+
+    fireEvent.click(screen.getByRole('button', { name: 'NOMBO' }))
+
+    expect(screen.getByText('bbbbbbbb')).toBeInTheDocument()
+    expect(screen.queryByText('aaaaaaaa')).not.toBeInTheDocument()
+  })
+
   it('filters to analyses with MILCO detections', async () => {
     vi.mocked(listAnalyses).mockResolvedValue({
       items: [summaryA, summaryB],
@@ -150,6 +181,46 @@ describe('HistoricoPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Carregar mais' }))
 
     expect(await screen.findByText('bbbbbbbb')).toBeInTheDocument()
+  })
+
+  it('hides Carregar mais when the next page is empty', async () => {
+    const firstPage = Array.from({ length: 50 }, (_, index) => ({
+      ...summaryA,
+      id: `page1-${index}`,
+    }))
+    vi.mocked(listAnalyses)
+      .mockResolvedValueOnce({
+        items: firstPage,
+        limit: 50,
+        offset: 0,
+      })
+      .mockResolvedValueOnce({
+        items: [],
+        limit: 50,
+        offset: 50,
+      })
+    vi.mocked(getAnalysis).mockImplementation(async (id: string) => ({
+      id,
+      org_id: 'org',
+      user_id: 'user',
+      status: 'succeeded',
+      detections: [],
+      image_content_type: 'image/png',
+      image_s3_key: 'key',
+      image_url: null,
+      created_at: summaryA.created_at,
+      inference_ms: 100,
+    }))
+
+    renderHistorico()
+    await screen.findByText('page1-0'.slice(0, 8))
+    expect(screen.getByRole('button', { name: 'Carregar mais' })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Carregar mais' }))
+
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: 'Carregar mais' })).not.toBeInTheDocument()
+    })
   })
 
   it('navigates to resultado when a row is clicked', async () => {

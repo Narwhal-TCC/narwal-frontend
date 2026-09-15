@@ -41,7 +41,7 @@ describe('HomePage', () => {
   })
 
   it('shows populated counts and survives a single enrich failure', async () => {
-    const now = new Date().toISOString()
+    const now = new Date(Date.now() - 30_000).toISOString()
     vi.mocked(listAnalyses).mockResolvedValue({
       items: [
         {
@@ -93,6 +93,7 @@ describe('HomePage', () => {
       expect(screen.getByText('Análises realizadas').closest('div')).toHaveTextContent('2')
     })
     expect(screen.getByText('Detecções MILCO').closest('div')).toHaveTextContent('1')
+    expect(screen.getByText('Última análise').closest('div')).toHaveTextContent('agora')
     expect(screen.getByText('Campanha ativa').closest('div')).toHaveTextContent('Santos 2026')
   })
 
