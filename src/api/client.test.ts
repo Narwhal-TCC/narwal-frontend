@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { ACCESS_TOKEN_KEY } from '../auth/token'
 import { apiRequest, ApiError } from './client'
-
-const TOKEN_KEY = 'navi-access-token'
 
 describe('apiRequest', () => {
   beforeEach(() => {
@@ -14,7 +13,7 @@ describe('apiRequest', () => {
   })
 
   it('returns parsed JSON on success and sends Bearer token when stored', async () => {
-    localStorage.setItem(TOKEN_KEY, 'test-token')
+    localStorage.setItem(ACCESS_TOKEN_KEY, 'test-token')
     vi.mocked(fetch).mockResolvedValue(
       new Response(JSON.stringify({ ok: true }), {
         status: 200,

@@ -219,9 +219,9 @@ T20 -> T21
 
 **Done when**:
 
-- [ ] Unit tests cover set, get, clear
-- [ ] Gate check passes: `npm test`
-- [ ] Test count: ≥3 tests pass
+- [x] Unit tests cover set, get, clear
+- [x] Gate check passes: `npm test`
+- [x] Test count: ≥3 tests pass
 
 **Tests**: unit
 **Gate**: quick

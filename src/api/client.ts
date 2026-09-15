@@ -1,4 +1,4 @@
-const ACCESS_TOKEN_KEY = 'navi-access-token'
+import { getAccessToken } from '../auth/token'
 
 export class ApiError extends Error {
   code: string
@@ -17,10 +17,6 @@ interface ErrorBody {
   message?: string
 }
 
-function getStoredAccessToken(): string | null {
-  return localStorage.getItem(ACCESS_TOKEN_KEY)
-}
-
 export async function apiRequest<T>(
   path: string,
   init: RequestInit = {},
@@ -31,7 +27,7 @@ export async function apiRequest<T>(
     headers.set('Content-Type', 'application/json')
   }
 
-  const token = getStoredAccessToken()
+  const token = getAccessToken()
   if (token) {
     headers.set('Authorization', `Bearer ${token}`)
   }

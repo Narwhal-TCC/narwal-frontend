@@ -200,7 +200,7 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 | NAVI-02 | P1: Login and session | Design | Implementing |
 | NAVI-03 | P1: Login and session | Design | Pending |
 | NAVI-04 | P1: Login and session | Design | Pending |
-| NAVI-05 | P1: Login and session | Design | Pending |
+| NAVI-05 | P1: Login and session | Design | Implementing |
 | NAVI-06 | P1: Theme toggle | Design | Implementing |
 | NAVI-07 | P1: Theme toggle | Design | Pending |
 | NAVI-08 | P1: Theme toggle | Design | Pending |
