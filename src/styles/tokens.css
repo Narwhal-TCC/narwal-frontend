@@ -1,0 +1,23 @@
+:root,
+[data-theme='dark'] {
+  --navi-bg: #141b41;
+  --navi-card: #202c60;
+  --navi-accent: #306bac;
+  --navi-muted: #5a7ab0;
+  --navi-text: #e8f0ff;
+  --navi-border: #2a3870;
+}
+
+[data-theme='light'] {
+  --navi-bg: #f4f7fc;
+  --navi-card: #ffffff;
+  --navi-accent: #306bac;
+  --navi-muted: #5a7ab0;
+  --navi-text: #141b41;
+  --navi-border: #d4deef;
+}
+
+html {
+  background-color: var(--navi-bg);
+  color: var(--navi-text);
+}

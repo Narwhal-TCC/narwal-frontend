@@ -117,9 +117,9 @@ T20 -> T21
 
 **Done when**:
 
-- [ ] Dark and light variable sets exist
-- [ ] App imports tokens stylesheet
-- [ ] Gate check passes: `npm test && npm run build`
+- [x] Dark and light variable sets exist
+- [x] App imports tokens stylesheet
+- [x] Gate check passes: `npm test && npm run build`
 
 **Tests**: none
 **Gate**: build
