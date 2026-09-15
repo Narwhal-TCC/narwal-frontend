@@ -553,9 +553,9 @@ T20 -> T21
 
 **Done when**:
 
-- [ ] RTL tests: renders detections; empty list treatment; null image_url placeholder
-- [ ] Gate check passes: `npm test`
-- [ ] Test count: ≥3 tests pass
+- [x] RTL tests: renders detections; empty list treatment; null image_url placeholder
+- [x] Gate check passes: `npm test`
+- [x] Test count: ≥3 tests pass
 
 **Tests**: unit
 **Gate**: full
