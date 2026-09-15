@@ -296,9 +296,9 @@ T20 -> T21
 
 **Done when**:
 
-- [ ] RTL tests cover login success, logout clears token, failed login keeps logged out
-- [ ] Gate check passes: `npm test`
-- [ ] Test count: ≥3 tests pass
+- [x] RTL tests cover login success, logout clears token, failed login keeps logged out
+- [x] Gate check passes: `npm test`
+- [x] Test count: ≥3 tests pass
 
 **Tests**: unit
 **Gate**: quick
