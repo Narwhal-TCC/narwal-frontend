@@ -202,8 +202,8 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 | NAVI-04 | P1: Login and session | Design | Pending |
 | NAVI-05 | P1: Login and session | Design | Implementing |
 | NAVI-06 | P1: Theme toggle | Design | Implementing |
-| NAVI-07 | P1: Theme toggle | Design | Pending |
-| NAVI-08 | P1: Theme toggle | Design | Pending |
+| NAVI-07 | P1: Theme toggle | Design | Implementing |
+| NAVI-08 | P1: Theme toggle | Design | Implementing |
 | NAVI-09 | P1: Home dashboard | Design | Pending |
 | NAVI-10 | P1: Home dashboard | Design | Pending |
 | NAVI-11 | P1: Home dashboard | Design | Implementing |

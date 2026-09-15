@@ -244,9 +244,9 @@ T20 -> T21
 
 **Done when**:
 
-- [ ] RTL tests cover default dark, toggle, and restore from localStorage
-- [ ] Gate check passes: `npm test`
-- [ ] Test count: ≥3 tests pass
+- [x] RTL tests cover default dark, toggle, and restore from localStorage
+- [x] Gate check passes: `npm test`
+- [x] Test count: ≥3 tests pass
 
 **Tests**: unit
 **Gate**: quick
