@@ -193,10 +193,10 @@ T20 -> T21
 
 **Done when**:
 
-- [ ] Success and error paths unit-tested (mock `fetch`)
-- [ ] Unauthorized responses expose code `UNAUTHORIZED`
-- [ ] Gate check passes: `npm test`
-- [ ] Test count: ≥3 tests pass
+- [x] Success and error paths unit-tested (mock `fetch`)
+- [x] Unauthorized responses expose code `UNAUTHORIZED`
+- [x] Gate check passes: `npm test`
+- [x] Test count: ≥3 tests pass
 
 **Tests**: unit
 **Gate**: quick

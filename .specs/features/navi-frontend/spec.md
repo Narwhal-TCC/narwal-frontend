@@ -196,8 +196,8 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| NAVI-01 | P1: Login and session | Design | Pending |
-| NAVI-02 | P1: Login and session | Design | Pending |
+| NAVI-01 | P1: Login and session | Design | Implementing |
+| NAVI-02 | P1: Login and session | Design | Implementing |
 | NAVI-03 | P1: Login and session | Design | Pending |
 | NAVI-04 | P1: Login and session | Design | Pending |
 | NAVI-05 | P1: Login and session | Design | Pending |
