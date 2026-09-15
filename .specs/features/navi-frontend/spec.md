@@ -219,7 +219,7 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 | NAVI-21 | P1: Resultado with overlay | Design | Implementing |
 | NAVI-22 | P1: Resultado with overlay | Design | Pending |
 | NAVI-23 | P1: Resultado with overlay | Design | Pending |
-| NAVI-24 | P1: Histórico | Design | Pending |
+| NAVI-24 | P1: Histórico | Design | Implementing |
 | NAVI-25 | P1: Histórico | Design | Implementing |
 | NAVI-26 | P1: Histórico | Design | Implementing |
 | NAVI-27 | P1: Histórico | Design | Pending |

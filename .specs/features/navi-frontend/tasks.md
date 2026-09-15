@@ -168,9 +168,9 @@ T20 -> T21
 
 **Done when**:
 
-- [ ] `shortId` implemented with unit tests for short and long ids
-- [ ] Gate check passes: `npm test`
-- [ ] Test count: ≥2 tests pass
+- [x] `shortId` implemented with unit tests for short and long ids
+- [x] Gate check passes: `npm test`
+- [x] Test count: ≥2 tests pass
 
 **Tests**: unit
 **Gate**: quick
