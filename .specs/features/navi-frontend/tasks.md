@@ -580,9 +580,9 @@ T20 -> T21
 
 **Done when**:
 
-- [ ] RTL tests: list render; MILCO filter; empty state; load more append; row navigates to result
-- [ ] Gate check passes: `npm test`
-- [ ] Test count: ≥5 tests pass
+- [x] RTL tests: list render; MILCO filter; empty state; load more append; row navigates to result
+- [x] Gate check passes: `npm test`
+- [x] Test count: ≥5 tests pass
 
 **Tests**: unit
 **Gate**: full

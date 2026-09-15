@@ -1,3 +1,182 @@
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import {
+  getAnalysis,
+  listAnalyses,
+  type AnalysisResult,
+  type AnalysisSummary,
+} from '../api/analyses'
+import { analysisHasClass, type DetectionClass } from '../domain/classification'
+import { shortId } from '../domain/idDisplay'
+
+const PAGE_SIZE = 50
+
+type FilterOption = 'ALL' | DetectionClass
+
+interface EnrichedItem {
+  summary: AnalysisSummary
+  detail: AnalysisResult | null
+}
+
+function formatDate(iso: string): string {
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+    .format(new Date(iso))
+    .replace('.', '')
+}
+
+async function enrichSummaries(items: AnalysisSummary[]): Promise<EnrichedItem[]> {
+  const details = await Promise.all(
+    items.map(async (summary) => {
+      try {
+        const detail = await getAnalysis(summary.id)
+        return { summary, detail }
+      } catch {
+        return { summary, detail: null }
+      }
+    }),
+  )
+  return details
+}
+
 export function HistoricoPage() {
-  return <div>Histórico</div>
+  const navigate = useNavigate()
+  const [items, setItems] = useState<EnrichedItem[]>([])
+  const [filter, setFilter] = useState<FilterOption>('ALL')
+  const [offset, setOffset] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+
+  const loadPage = useCallback(async (pageOffset: number, append: boolean) => {
+    const response = await listAnalyses(PAGE_SIZE, pageOffset)
+    const enriched = await enrichSummaries(response.items)
+    setHasMore(response.items.length === PAGE_SIZE)
+    setOffset(pageOffset + response.items.length)
+    setItems((current) => (append ? [...current, ...enriched] : enriched))
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    setIsLoading(true)
+    loadPage(0, false)
+      .catch(() => {
+        if (!cancelled) setItems([])
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [loadPage])
+
+  const filteredItems = useMemo(() => {
+    if (filter === 'ALL') return items
+    return items.filter(
+      (item) => item.detail && analysisHasClass(item.detail.detections, filter),
+    )
+  }, [filter, items])
+
+  const handleLoadMore = async () => {
+    setIsLoadingMore(true)
+    try {
+      await loadPage(offset, true)
+    } finally {
+      setIsLoadingMore(false)
+    }
+  }
+
+  return (
+    <div className="px-9 py-8">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]">
+            Histórico
+          </p>
+          <h1 className="pt-1.5 font-serif text-[30px] leading-[45px] text-[color:var(--navi-text)]">
+            Histórico
+          </h1>
+        </div>
+        <div className="flex gap-2">
+          {(['ALL', 'MILCO', 'NOMBO'] as const).map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => setFilter(option)}
+              className={[
+                'rounded-md px-3 py-1.5 text-sm font-medium',
+                filter === option
+                  ? 'bg-[var(--navi-accent)] text-[#f3f7ff]'
+                  : 'border border-[rgba(111,156,235,0.25)] text-[#98b9f2]',
+              ].join(' ')}
+            >
+              {option === 'ALL' ? 'Todos' : option}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {isLoading ? (
+        <p className="pt-8 text-[color:var(--navi-muted)]">Carregando histórico…</p>
+      ) : filteredItems.length === 0 ? (
+        <div className="mt-12 flex flex-col items-center text-center">
+          <p className="text-lg font-semibold text-[color:var(--navi-text)]">
+            Resultado não encontrado
+          </p>
+          <p className="pt-2 text-sm text-[color:var(--navi-muted)]">
+            Nenhuma análise corresponde ao filtro selecionado.
+          </p>
+        </div>
+      ) : (
+        <ul className="mt-8 space-y-3">
+          {filteredItems.map(({ summary, detail }) => (
+            <li key={summary.id}>
+              <button
+                type="button"
+                onClick={() => navigate(`/analises/${summary.id}`)}
+                className="flex w-full items-center justify-between rounded-[10px] border border-[rgba(111,156,235,0.15)] bg-[#1c2654] px-5 py-4 text-left hover:border-[rgba(111,156,235,0.35)]"
+              >
+                <div>
+                  <p className="font-mono text-sm font-semibold text-[color:var(--navi-text)]">
+                    {shortId(summary.id)}
+                  </p>
+                  <p className="pt-1 text-xs text-[color:var(--navi-muted)]">
+                    {formatDate(summary.created_at)}
+                  </p>
+                </div>
+                <div className="text-right text-sm text-[#98b9f2]">
+                  <p>{summary.detection_count} detecções</p>
+                  {detail ? (
+                    <p className="pt-0.5 text-xs text-[color:var(--navi-muted)]">
+                      {detail.detections.filter((d) => d.confidence >= 0.8).length} MILCO
+                    </p>
+                  ) : null}
+                </div>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {hasMore && filteredItems.length > 0 ? (
+        <div className="mt-6 flex justify-center">
+          <button
+            type="button"
+            onClick={handleLoadMore}
+            disabled={isLoadingMore}
+            className="rounded-md border border-[rgba(111,156,235,0.25)] px-5 py-2.5 text-sm font-medium text-[#98b9f2] disabled:opacity-60"
+          >
+            {isLoadingMore ? 'Carregando…' : 'Carregar mais'}
+          </button>
+        </div>
+      ) : null}
+    </div>
+  )
 }

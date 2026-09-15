@@ -219,12 +219,12 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 | NAVI-21 | P1: Resultado with overlay | Design | Verified |
 | NAVI-22 | P1: Resultado with overlay | Design | Verified |
 | NAVI-23 | P1: Resultado with overlay | Design | Verified |
-| NAVI-24 | P1: Histórico | Design | Implementing |
-| NAVI-25 | P1: Histórico | Design | Implementing |
-| NAVI-26 | P1: Histórico | Design | Implementing |
-| NAVI-27 | P1: Histórico | Design | Pending |
-| NAVI-28 | P1: Histórico | Design | Pending |
-| NAVI-29 | P1: Histórico | Design | Pending |
+| NAVI-24 | P1: Histórico | Design | Verified |
+| NAVI-25 | P1: Histórico | Design | Verified |
+| NAVI-26 | P1: Histórico | Design | Verified |
+| NAVI-27 | P1: Histórico | Design | Verified |
+| NAVI-28 | P1: Histórico | Design | Verified |
+| NAVI-29 | P1: Histórico | Design | Verified |
 | NAVI-30 | P2: Shell navigation | Design | Implementing |
 | NAVI-31 | P2: Shell navigation | Design | Implementing |
 
