@@ -196,43 +196,43 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| NAVI-01 | P1: Login and session | Design | Implementing |
-| NAVI-02 | P1: Login and session | Design | Implementing |
-| NAVI-03 | P1: Login and session | Design | Implementing |
-| NAVI-04 | P1: Login and session | Design | Implementing |
-| NAVI-05 | P1: Login and session | Design | Implementing |
-| NAVI-06 | P1: Theme toggle | Design | Implementing |
-| NAVI-07 | P1: Theme toggle | Design | Implementing |
-| NAVI-08 | P1: Theme toggle | Design | Implementing |
-| NAVI-09 | P1: Home dashboard | Design | Verified |
-| NAVI-10 | P1: Home dashboard | Design | Implementing |
-| NAVI-11 | P1: Home dashboard | Design | Implementing |
-| NAVI-12 | P1: Home dashboard | Design | Implementing |
-| NAVI-13 | P1: Home dashboard | Design | Implementing |
-| NAVI-14 | P1: Nova análise and loading | Design | Verified |
-| NAVI-15 | P1: Nova análise and loading | Design | Verified |
-| NAVI-16 | P1: Nova análise and loading | Design | Verified |
-| NAVI-17 | P1: Nova análise and loading | Design | Verified |
-| NAVI-18 | P1: Nova análise and loading | Design | Verified |
-| NAVI-19 | P1: Resultado with overlay | Design | Verified |
-| NAVI-20 | P1: Resultado with overlay | Design | Verified |
-| NAVI-21 | P1: Resultado with overlay | Design | Verified |
-| NAVI-22 | P1: Resultado with overlay | Design | Verified |
-| NAVI-23 | P1: Resultado with overlay | Design | Verified |
-| NAVI-24 | P1: Histórico | Design | Verified |
-| NAVI-25 | P1: Histórico | Design | Verified |
-| NAVI-26 | P1: Histórico | Design | Verified |
-| NAVI-27 | P1: Histórico | Design | Verified |
-| NAVI-28 | P1: Histórico | Design | Verified |
-| NAVI-29 | P1: Histórico | Design | Verified |
-| NAVI-30 | P2: Shell navigation | Design | Implementing |
-| NAVI-31 | P2: Shell navigation | Design | Implementing |
+| NAVI-01 | P1: Login and session | Execute | Verified |
+| NAVI-02 | P1: Login and session | Execute | Verified |
+| NAVI-03 | P1: Login and session | Execute | Verified |
+| NAVI-04 | P1: Login and session | Execute | Verified |
+| NAVI-05 | P1: Login and session | Execute | Verified |
+| NAVI-06 | P1: Theme toggle | Execute | Verified |
+| NAVI-07 | P1: Theme toggle | Execute | Verified |
+| NAVI-08 | P1: Theme toggle | Execute | Verified |
+| NAVI-09 | P1: Home dashboard | Execute | Verified |
+| NAVI-10 | P1: Home dashboard | Execute | Verified |
+| NAVI-11 | P1: Home dashboard | Execute | Verified |
+| NAVI-12 | P1: Home dashboard | Execute | Verified |
+| NAVI-13 | P1: Home dashboard | Execute | Verified |
+| NAVI-14 | P1: Nova análise and loading | Execute | Verified |
+| NAVI-15 | P1: Nova análise and loading | Execute | Verified |
+| NAVI-16 | P1: Nova análise and loading | Execute | Verified |
+| NAVI-17 | P1: Nova análise and loading | Execute | Verified |
+| NAVI-18 | P1: Nova análise and loading | Execute | Verified |
+| NAVI-19 | P1: Resultado with overlay | Execute | Verified |
+| NAVI-20 | P1: Resultado with overlay | Execute | Verified |
+| NAVI-21 | P1: Resultado with overlay | Execute | Verified |
+| NAVI-22 | P1: Resultado with overlay | Execute | Verified |
+| NAVI-23 | P1: Resultado with overlay | Execute | Verified |
+| NAVI-24 | P1: Histórico | Execute | Verified |
+| NAVI-25 | P1: Histórico | Execute | Verified |
+| NAVI-26 | P1: Histórico | Execute | Verified |
+| NAVI-27 | P1: Histórico | Execute | Verified |
+| NAVI-28 | P1: Histórico | Execute | Verified |
+| NAVI-29 | P1: Histórico | Execute | Verified |
+| NAVI-30 | P2: Shell navigation | Execute | Verified |
+| NAVI-31 | P2: Shell navigation | Execute | Verified |
 
 **ID format:** `NAVI-[NUMBER]`
 
 **Status values:** Pending → In Design → In Tasks → Implementing → Verified
 
-**Coverage:** 31 total, 0 mapped to tasks, 31 unmapped ⚠️ (tasks phase next)
+**Coverage:** 31 total, 31 verified in Execute
 
 ---
 
