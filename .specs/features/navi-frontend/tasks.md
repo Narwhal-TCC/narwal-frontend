@@ -503,9 +503,9 @@ T20 -> T21
 
 **Done when**:
 
-- [ ] RTL tests: success navigates to `/analises/:id`; error returns to nova with message; missing file redirects to nova
-- [ ] Gate check passes: `npm test`
-- [ ] Test count: ≥3 tests pass
+- [x] RTL tests: success navigates to `/analises/:id`; error returns to nova with message; missing file redirects to nova
+- [x] Gate check passes: `npm test`
+- [x] Test count: ≥3 tests pass
 
 **Tests**: unit
 **Gate**: full
