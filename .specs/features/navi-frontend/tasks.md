@@ -450,10 +450,10 @@ T20 -> T21
 
 **Done when**:
 
-- [ ] RTL tests with mocked API: empty org zeros; populated counts; CTA navigates
-- [ ] Single enrich failure does not crash page
-- [ ] Gate check passes: `npm test`
-- [ ] Test count: ≥3 tests pass
+- [x] RTL tests with mocked API: empty org zeros; populated counts; CTA navigates
+- [x] Single enrich failure does not crash page
+- [x] Gate check passes: `npm test`
+- [x] Test count: ≥3 tests pass
 
 **Tests**: unit
 **Gate**: full

@@ -204,11 +204,11 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 | NAVI-06 | P1: Theme toggle | Design | Implementing |
 | NAVI-07 | P1: Theme toggle | Design | Implementing |
 | NAVI-08 | P1: Theme toggle | Design | Implementing |
-| NAVI-09 | P1: Home dashboard | Design | Pending |
-| NAVI-10 | P1: Home dashboard | Design | Pending |
+| NAVI-09 | P1: Home dashboard | Design | Implementing |
+| NAVI-10 | P1: Home dashboard | Design | Implementing |
 | NAVI-11 | P1: Home dashboard | Design | Implementing |
-| NAVI-12 | P1: Home dashboard | Design | Pending |
-| NAVI-13 | P1: Home dashboard | Design | Pending |
+| NAVI-12 | P1: Home dashboard | Design | Implementing |
+| NAVI-13 | P1: Home dashboard | Design | Implementing |
 | NAVI-14 | P1: Nova análise and loading | Design | Pending |
 | NAVI-15 | P1: Nova análise and loading | Design | Pending |
 | NAVI-16 | P1: Nova análise and loading | Design | Pending |
