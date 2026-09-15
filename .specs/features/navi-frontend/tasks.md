@@ -425,9 +425,9 @@ T20 -> T21
 
 **Done when**:
 
-- [ ] Unit tests cover list, get, create (mock fetch) including multipart create
-- [ ] Gate check passes: `npm test`
-- [ ] Test count: ≥3 tests pass
+- [x] Unit tests cover list, get, create (mock fetch) including multipart create
+- [x] Gate check passes: `npm test`
+- [x] Test count: ≥3 tests pass
 
 **Tests**: unit
 **Gate**: quick
