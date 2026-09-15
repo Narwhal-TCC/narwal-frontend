@@ -478,9 +478,9 @@ T20 -> T21
 
 **Done when**:
 
-- [ ] RTL tests reject invalid type/size; accept valid file and navigate to loading
-- [ ] Gate check passes: `npm test`
-- [ ] Test count: ≥3 tests pass
+- [x] RTL tests reject invalid type/size; accept valid file and navigate to loading
+- [x] Gate check passes: `npm test`
+- [x] Test count: ≥3 tests pass
 
 **Tests**: unit
 **Gate**: full

@@ -209,9 +209,9 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 | NAVI-11 | P1: Home dashboard | Design | Implementing |
 | NAVI-12 | P1: Home dashboard | Design | Implementing |
 | NAVI-13 | P1: Home dashboard | Design | Implementing |
-| NAVI-14 | P1: Nova análise and loading | Design | Pending |
-| NAVI-15 | P1: Nova análise and loading | Design | Pending |
-| NAVI-16 | P1: Nova análise and loading | Design | Pending |
+| NAVI-14 | P1: Nova análise and loading | Design | Verified |
+| NAVI-15 | P1: Nova análise and loading | Design | Verified |
+| NAVI-16 | P1: Nova análise and loading | Design | Implementing |
 | NAVI-17 | P1: Nova análise and loading | Design | Pending |
 | NAVI-18 | P1: Nova análise and loading | Design | Pending |
 | NAVI-19 | P1: Resultado with overlay | Design | Pending |
