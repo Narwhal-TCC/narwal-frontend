@@ -1,0 +1,10 @@
+.agents/
+.cursor/
+
+.specs/
+
+skills-lock.json
+
+node_modules/
+dist/
+*.local
