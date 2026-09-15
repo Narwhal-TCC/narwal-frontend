@@ -214,11 +214,11 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 | NAVI-16 | P1: Nova análise and loading | Design | Verified |
 | NAVI-17 | P1: Nova análise and loading | Design | Verified |
 | NAVI-18 | P1: Nova análise and loading | Design | Verified |
-| NAVI-19 | P1: Resultado with overlay | Design | Pending |
-| NAVI-20 | P1: Resultado with overlay | Design | Pending |
-| NAVI-21 | P1: Resultado with overlay | Design | Implementing |
-| NAVI-22 | P1: Resultado with overlay | Design | Pending |
-| NAVI-23 | P1: Resultado with overlay | Design | Pending |
+| NAVI-19 | P1: Resultado with overlay | Design | Implementing |
+| NAVI-20 | P1: Resultado with overlay | Design | Implementing |
+| NAVI-21 | P1: Resultado with overlay | Design | Verified |
+| NAVI-22 | P1: Resultado with overlay | Design | Implementing |
+| NAVI-23 | P1: Resultado with overlay | Design | Implementing |
 | NAVI-24 | P1: Histórico | Design | Implementing |
 | NAVI-25 | P1: Histórico | Design | Implementing |
 | NAVI-26 | P1: Histórico | Design | Implementing |

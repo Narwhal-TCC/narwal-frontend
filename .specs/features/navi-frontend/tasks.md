@@ -528,9 +528,9 @@ T20 -> T21
 
 **Done when**:
 
-- [ ] RTL tests: empty detections; placeholder when no url; box geometry style uses scaled left/top/width/height
-- [ ] Gate check passes: `npm test`
-- [ ] Test count: ≥3 tests pass
+- [x] RTL tests: empty detections; placeholder when no url; box geometry style uses scaled left/top/width/height
+- [x] Gate check passes: `npm test`
+- [x] Test count: ≥3 tests pass
 
 **Tests**: unit
 **Gate**: quick
