@@ -271,9 +271,9 @@ T20 -> T21
 
 **Done when**:
 
-- [ ] Unit tests mock client/fetch for success and `INVALID_CREDENTIALS`
-- [ ] Gate check passes: `npm test`
-- [ ] Test count: ≥2 tests pass
+- [x] Unit tests mock client/fetch for success and `INVALID_CREDENTIALS`
+- [x] Gate check passes: `npm test`
+- [x] Test count: ≥2 tests pass
 
 **Tests**: unit
 **Gate**: quick
