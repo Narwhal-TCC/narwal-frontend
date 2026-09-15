@@ -1,5 +1,7 @@
-import { DragEvent, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
+import type { DragEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { icoUploadDrop } from '../assets'
 import { validateUploadFile } from '../domain/uploadValidation'
 import { setPendingUploadFile } from '../upload/pendingFile'
 
@@ -64,7 +66,7 @@ export function NovaAnalisePage() {
           }}
           onDragOver={(event) => event.preventDefault()}
           onDrop={onDrop}
-          className="flex min-h-[260px] cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-[rgba(111,156,235,0.25)] bg-[#1c2654] p-8"
+          className="flex min-h-[260px] cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-[color:var(--navi-border-strong)] bg-[color:var(--navi-panel)] p-8"
         >
           <input
             ref={inputRef}
@@ -73,17 +75,8 @@ export function NovaAnalisePage() {
             className="hidden"
             onChange={onInputChange}
           />
-          <div className="flex size-14 items-center justify-center rounded-full bg-[rgba(111,156,235,0.12)]">
-            <svg viewBox="0 0 28 28" className="size-7 text-[#98b9f2]" aria-hidden="true">
-              <path
-                d="M14 6v10M10 10l4-4 4 4M8 20h12"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+          <div className="flex size-14 items-center justify-center rounded-full bg-[color:var(--navi-surface-tint)]">
+            <img src={icoUploadDrop} alt="" className="size-7" />
           </div>
           <div className="text-center">
             <p className="text-[15px] font-semibold text-[color:var(--navi-text)]">
@@ -99,7 +92,7 @@ export function NovaAnalisePage() {
         </div>
 
         <div className="flex flex-col gap-4">
-          <div className="rounded-[10px] border border-[rgba(111,156,235,0.15)] bg-[#1c2654] p-5">
+          <div className="rounded-[10px] border border-[color:var(--navi-border-subtle)] bg-[color:var(--navi-panel)] p-5">
             <p className="text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]">
               Dados da coleta
             </p>
@@ -108,7 +101,7 @@ export function NovaAnalisePage() {
                 <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]">
                   Coordenadas
                 </label>
-                <div className="rounded-md border border-[rgba(111,156,235,0.25)] bg-[rgba(255,255,255,0.05)] px-3 py-2.5 font-mono text-sm text-[rgba(232,240,255,0.5)]">
+                <div className="rounded-md border border-[color:var(--navi-border-strong)] bg-[color:var(--navi-input-bg)] px-3 py-2.5 font-mono text-sm text-[color:var(--navi-muted)]">
                   23°58&apos;S  43°10&apos;W
                 </div>
               </div>
@@ -116,13 +109,13 @@ export function NovaAnalisePage() {
                 <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]">
                   Data e hora da coleta
                 </label>
-                <div className="h-[43px] rounded-md border border-[rgba(111,156,235,0.25)] bg-[rgba(255,255,255,0.05)]" />
+                <div className="h-[43px] rounded-md border border-[color:var(--navi-border-strong)] bg-[color:var(--navi-input-bg)]" />
               </div>
               <div>
                 <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]">
                   Campanha
                 </label>
-                <div className="rounded-md border border-[rgba(111,156,235,0.25)] bg-[rgba(255,255,255,0.05)] px-3 py-2.5 font-mono text-sm text-[color:var(--navi-text)]">
+                <div className="rounded-md border border-[color:var(--navi-border-strong)] bg-[color:var(--navi-input-bg)] px-3 py-2.5 font-mono text-sm text-[color:var(--navi-text)]">
                   Levantamento Santos 2026
                 </div>
               </div>
@@ -130,7 +123,7 @@ export function NovaAnalisePage() {
           </div>
 
           {error ? (
-            <p role="alert" className="text-[13px] text-[#e8836a]">
+            <p role="alert" className="text-[13px] text-[color:var(--navi-milco)]">
               {error}
             </p>
           ) : null}
@@ -138,14 +131,14 @@ export function NovaAnalisePage() {
           <button
             type="button"
             onClick={onSubmit}
-            className="w-full rounded-md bg-[var(--navi-accent)] px-5 py-2.5 text-sm font-semibold text-[#f3f7ff]"
+            className="w-full rounded-md bg-[var(--navi-accent)] px-5 py-2.5 text-sm font-semibold text-[color:var(--navi-button-text)]"
           >
             Iniciar análise
           </button>
           <button
             type="button"
             onClick={() => navigate('/')}
-            className="w-full rounded-md border border-[rgba(111,156,235,0.25)] px-5 py-2.5 text-sm font-medium text-[#98b9f2]"
+            className="w-full rounded-md border border-[color:var(--navi-border-strong)] px-5 py-2.5 text-sm font-medium text-[color:var(--navi-link)]"
           >
             Cancelar
           </button>

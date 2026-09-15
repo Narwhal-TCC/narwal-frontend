@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getAnalysis, listAnalyses, type AnalysisSummary } from '../api/analyses'
+import { getAnalysis, listAnalyses } from '../api/analyses'
 import { countMilco } from '../domain/classification'
 
 const ACTIVE_CAMPAIGN = 'Santos 2026'
@@ -92,7 +92,7 @@ function KpiCard({
       <p
         className={[
           'pt-1.5 font-mono text-[26px] font-bold leading-[28.6px]',
-          accent ? 'text-[#e8836a]' : 'text-[color:var(--navi-text)]',
+          accent ? 'text-[color:var(--navi-milco)]' : 'text-[color:var(--navi-text)]',
         ].join(' ')}
       >
         {value}
@@ -138,27 +138,27 @@ export function HomePage() {
         Visão geral
       </h1>
 
-      <div className="mt-9 rounded-2xl border border-[color:var(--navi-border)] bg-[#1c2654] p-8">
+      <div className="mt-9 rounded-2xl border border-[color:var(--navi-border)] bg-[color:var(--navi-panel)] p-8">
         <div className="flex items-center justify-between gap-6">
           <div className="max-w-[380px]">
             <h2 className="text-xl font-semibold text-[color:var(--navi-text)]">
               Iniciar nova análise
             </h2>
-            <p className="pt-2 text-sm text-[#98b9f2]">
+            <p className="pt-2 text-sm text-[color:var(--navi-link)]">
               Envie uma imagem de sonar de varredura lateral para classificação automática de
               objetos no leito marinho.
             </p>
           </div>
           <Link
             to="/analises/nova"
-            className="inline-flex items-center gap-2 rounded-md bg-[var(--navi-accent)] px-5 py-2.5 text-sm font-semibold text-[#f3f7ff]"
+            className="inline-flex items-center gap-2 rounded-md bg-[var(--navi-accent)] px-5 py-2.5 text-sm font-semibold text-[color:var(--navi-button-text)]"
           >
             Nova análise
           </Link>
         </div>
       </div>
 
-      <div className="mt-7 flex overflow-hidden rounded-[10px] border border-[color:var(--navi-border)] bg-[#1c2654]">
+      <div className="mt-7 flex overflow-hidden rounded-[10px] border border-[color:var(--navi-border)] bg-[color:var(--navi-panel)]">
         <KpiCard
           label="Análises realizadas"
           value={isLoading ? '—' : data.analysisCount}

@@ -605,9 +605,9 @@ T20 -> T21
 
 **Done when**:
 
-- [ ] No ephemeral `figma.com/api/mcp/asset` URLs remain in source
-- [ ] Light and dark screens use tokenized colors
-- [ ] Gate check passes: `npm test && npm run build`
+- [x] No ephemeral `figma.com/api/mcp/asset` URLs remain in source
+- [x] Light and dark screens use tokenized colors
+- [x] Gate check passes: `npm test && npm run build`
 
 **Tests**: none
 **Gate**: build

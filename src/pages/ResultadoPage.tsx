@@ -24,8 +24,8 @@ function DetectionBadge({ confidence }: { confidence: number }) {
       className={[
         'rounded px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide',
         detectionClass === 'MILCO'
-          ? 'bg-[rgba(232,131,106,0.2)] text-[#e8836a]'
-          : 'bg-[rgba(111,156,235,0.2)] text-[#6f9ceb]',
+          ? 'bg-[color-mix(in_srgb,var(--navi-milco)_20%,transparent)] text-[color:var(--navi-milco)]'
+          : 'bg-[color-mix(in_srgb,var(--navi-nombo)_20%,transparent)] text-[color:var(--navi-nombo)]',
       ].join(' ')}
     >
       {detectionClass}
@@ -71,7 +71,7 @@ export function ResultadoPage() {
 
   if (error || !analysis) {
     return (
-      <div className="px-9 py-8 text-[#e8836a]" role="alert">
+      <div className="px-9 py-8 text-[color:var(--navi-milco)]" role="alert">
         {error ?? 'Resultado não encontrado.'}
       </div>
     )
@@ -97,7 +97,7 @@ export function ResultadoPage() {
           imageUrl={analysis.image_url}
         />
 
-        <div className="rounded-[10px] border border-[rgba(111,156,235,0.15)] bg-[#1c2654] p-5">
+        <div className="rounded-[10px] border border-[color:var(--navi-border-subtle)] bg-[color:var(--navi-panel)] p-5">
           <p className="text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]">
             Detecções ({detections.length})
           </p>
@@ -111,7 +111,7 @@ export function ResultadoPage() {
               {detections.map((detection, index) => (
                 <li
                   key={`${detection.x1}-${detection.y1}-${index}`}
-                  className="flex items-center justify-between rounded-md border border-[rgba(111,156,235,0.12)] bg-[rgba(255,255,255,0.03)] px-3 py-2.5"
+                  className="flex items-center justify-between rounded-md border border-[color:var(--navi-border-subtle)] bg-[color:var(--navi-input-bg)] px-3 py-2.5"
                 >
                   <div>
                     <p className="text-sm font-medium text-[color:var(--navi-text)]">

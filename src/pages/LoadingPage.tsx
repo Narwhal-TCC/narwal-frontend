@@ -57,7 +57,7 @@ export function LoadingPage() {
   return (
     <div className="flex min-h-[480px] flex-col items-center justify-center px-9 py-16">
       <div
-        className="size-12 animate-spin rounded-full border-4 border-[rgba(111,156,235,0.2)] border-t-[var(--navi-accent)]"
+        className="size-12 animate-spin rounded-full border-4 border-[color:var(--navi-border-subtle)] border-t-[var(--navi-accent)]"
         role="status"
         aria-label="Carregando"
       />

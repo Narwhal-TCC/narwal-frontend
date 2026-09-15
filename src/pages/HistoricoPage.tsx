@@ -113,8 +113,8 @@ export function HistoricoPage() {
               className={[
                 'rounded-md px-3 py-1.5 text-sm font-medium',
                 filter === option
-                  ? 'bg-[var(--navi-accent)] text-[#f3f7ff]'
-                  : 'border border-[rgba(111,156,235,0.25)] text-[#98b9f2]',
+                  ? 'bg-[var(--navi-accent)] text-[color:var(--navi-button-text)]'
+                  : 'border border-[color:var(--navi-border-strong)] text-[color:var(--navi-link)]',
               ].join(' ')}
             >
               {option === 'ALL' ? 'Todos' : option}
@@ -141,7 +141,7 @@ export function HistoricoPage() {
               <button
                 type="button"
                 onClick={() => navigate(`/analises/${summary.id}`)}
-                className="flex w-full items-center justify-between rounded-[10px] border border-[rgba(111,156,235,0.15)] bg-[#1c2654] px-5 py-4 text-left hover:border-[rgba(111,156,235,0.35)]"
+                className="flex w-full items-center justify-between rounded-[10px] border border-[color:var(--navi-border-subtle)] bg-[color:var(--navi-panel)] px-5 py-4 text-left hover:border-[color:var(--navi-border-strong)]"
               >
                 <div>
                   <p className="font-mono text-sm font-semibold text-[color:var(--navi-text)]">
@@ -151,7 +151,7 @@ export function HistoricoPage() {
                     {formatDate(summary.created_at)}
                   </p>
                 </div>
-                <div className="text-right text-sm text-[#98b9f2]">
+                <div className="text-right text-sm text-[color:var(--navi-link)]">
                   <p>{summary.detection_count} detecções</p>
                   {detail ? (
                     <p className="pt-0.5 text-xs text-[color:var(--navi-muted)]">
@@ -171,7 +171,7 @@ export function HistoricoPage() {
             type="button"
             onClick={handleLoadMore}
             disabled={isLoadingMore}
-            className="rounded-md border border-[rgba(111,156,235,0.25)] px-5 py-2.5 text-sm font-medium text-[#98b9f2] disabled:opacity-60"
+            className="rounded-md border border-[color:var(--navi-border-strong)] px-5 py-2.5 text-sm font-medium text-[color:var(--navi-link)] disabled:opacity-60"
           >
             {isLoadingMore ? 'Carregando…' : 'Carregar mais'}
           </button>

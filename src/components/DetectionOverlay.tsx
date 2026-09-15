@@ -33,11 +33,14 @@ function boxStyle(
     height: `${(detection.y2 - detection.y1) * scaleY}px`,
     borderWidth: '2px',
     borderStyle: 'solid',
-    borderColor: detectionClass === 'MILCO' ? '#e8836a' : '#6f9ceb',
+    borderColor:
+      detectionClass === 'MILCO'
+        ? 'var(--navi-milco)'
+        : 'var(--navi-nombo)',
     backgroundColor:
       detectionClass === 'MILCO'
-        ? 'rgba(232, 131, 106, 0.15)'
-        : 'rgba(111, 156, 235, 0.15)',
+        ? 'color-mix(in srgb, var(--navi-milco) 15%, transparent)'
+        : 'color-mix(in srgb, var(--navi-nombo) 15%, transparent)',
   }
 }
 
@@ -82,7 +85,7 @@ export function DetectionOverlay({
     return (
       <div
         data-testid="detection-placeholder"
-        className="flex aspect-[4/3] w-full items-center justify-center rounded-lg border border-[rgba(111,156,235,0.15)] bg-[#1c2654] text-sm text-[color:var(--navi-muted)]"
+        className="flex aspect-[4/3] w-full items-center justify-center rounded-lg border border-[color:var(--navi-border-subtle)] bg-[color:var(--navi-panel)] text-sm text-[color:var(--navi-muted)]"
       >
         Imagem indisponível
       </div>
@@ -93,7 +96,7 @@ export function DetectionOverlay({
     <div
       ref={containerRef}
       data-testid="detection-overlay"
-      className="relative w-full overflow-hidden rounded-lg bg-[#0d1330]"
+      className="relative w-full overflow-hidden rounded-lg bg-[color:var(--navi-image-bg)]"
     >
       <img
         src={imageUrl}

@@ -204,7 +204,7 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 | NAVI-06 | P1: Theme toggle | Design | Implementing |
 | NAVI-07 | P1: Theme toggle | Design | Implementing |
 | NAVI-08 | P1: Theme toggle | Design | Implementing |
-| NAVI-09 | P1: Home dashboard | Design | Implementing |
+| NAVI-09 | P1: Home dashboard | Design | Verified |
 | NAVI-10 | P1: Home dashboard | Design | Implementing |
 | NAVI-11 | P1: Home dashboard | Design | Implementing |
 | NAVI-12 | P1: Home dashboard | Design | Implementing |
