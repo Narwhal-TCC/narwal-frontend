@@ -30,6 +30,6 @@ describe('App routes', () => {
   it('redirects unauthenticated users from home to login', async () => {
     renderApp('/')
 
-    expect(await screen.findByText('Login')).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /Entrar/i })).toBeInTheDocument()
   })
 })

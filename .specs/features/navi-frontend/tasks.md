@@ -400,9 +400,9 @@ T20 -> T21
 
 **Done when**:
 
-- [ ] RTL tests: empty submit shows required message without API; invalid credentials show error; success navigates
-- [ ] Gate check passes: `npm test`
-- [ ] Test count: ≥3 tests pass
+- [x] RTL tests: empty submit shows required message without API; invalid credentials show error; success navigates
+- [x] Gate check passes: `npm test`
+- [x] Test count: ≥3 tests pass
 
 **Tests**: unit
 **Gate**: full
