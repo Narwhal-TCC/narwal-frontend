@@ -206,7 +206,7 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 | NAVI-08 | P1: Theme toggle | Design | Pending |
 | NAVI-09 | P1: Home dashboard | Design | Pending |
 | NAVI-10 | P1: Home dashboard | Design | Pending |
-| NAVI-11 | P1: Home dashboard | Design | Pending |
+| NAVI-11 | P1: Home dashboard | Design | Implementing |
 | NAVI-12 | P1: Home dashboard | Design | Pending |
 | NAVI-13 | P1: Home dashboard | Design | Pending |
 | NAVI-14 | P1: Nova análise and loading | Design | Pending |
@@ -216,12 +216,12 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 | NAVI-18 | P1: Nova análise and loading | Design | Pending |
 | NAVI-19 | P1: Resultado with overlay | Design | Pending |
 | NAVI-20 | P1: Resultado with overlay | Design | Pending |
-| NAVI-21 | P1: Resultado with overlay | Design | Pending |
+| NAVI-21 | P1: Resultado with overlay | Design | Implementing |
 | NAVI-22 | P1: Resultado with overlay | Design | Pending |
 | NAVI-23 | P1: Resultado with overlay | Design | Pending |
 | NAVI-24 | P1: Histórico | Design | Pending |
-| NAVI-25 | P1: Histórico | Design | Pending |
-| NAVI-26 | P1: Histórico | Design | Pending |
+| NAVI-25 | P1: Histórico | Design | Implementing |
+| NAVI-26 | P1: Histórico | Design | Implementing |
 | NAVI-27 | P1: Histórico | Design | Pending |
 | NAVI-28 | P1: Histórico | Design | Pending |
 | NAVI-29 | P1: Histórico | Design | Pending |

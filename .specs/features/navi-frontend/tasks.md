@@ -142,10 +142,10 @@ T20 -> T21
 
 **Done when**:
 
-- [ ] `classifyDetection`, `countMilco`, `analysisHasClass` exported
-- [ ] Tests cover 0.79/0.80/0.81 and empty list
-- [ ] Gate check passes: `npm test`
-- [ ] Test count: ≥4 tests pass
+- [x] `classifyDetection`, `countMilco`, `analysisHasClass` exported
+- [x] Tests cover 0.79/0.80/0.81 and empty list
+- [x] Gate check passes: `npm test`
+- [x] Test count: ≥4 tests pass
 
 **Tests**: unit
 **Gate**: quick
