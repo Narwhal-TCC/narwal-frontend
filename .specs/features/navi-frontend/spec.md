@@ -198,8 +198,8 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 | -------------- | ----- | ----- | ------ |
 | NAVI-01 | P1: Login and session | Design | Implementing |
 | NAVI-02 | P1: Login and session | Design | Implementing |
-| NAVI-03 | P1: Login and session | Design | Pending |
-| NAVI-04 | P1: Login and session | Design | Pending |
+| NAVI-03 | P1: Login and session | Design | Implementing |
+| NAVI-04 | P1: Login and session | Design | Implementing |
 | NAVI-05 | P1: Login and session | Design | Implementing |
 | NAVI-06 | P1: Theme toggle | Design | Implementing |
 | NAVI-07 | P1: Theme toggle | Design | Implementing |

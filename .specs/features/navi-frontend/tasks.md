@@ -321,9 +321,9 @@ T20 -> T21
 
 **Done when**:
 
-- [ ] RTL/router tests cover redirect when no token and render when authenticated
-- [ ] Gate check passes: `npm test`
-- [ ] Test count: ≥2 tests pass
+- [x] RTL/router tests cover redirect when no token and render when authenticated
+- [x] Gate check passes: `npm test`
+- [x] Test count: ≥2 tests pass
 
 **Tests**: unit
 **Gate**: quick
