@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Detection } from '../api/analyses'
 import { classifyDetection } from '../domain/classification'
 
@@ -7,13 +7,34 @@ interface DetectionOverlayProps {
   imageUrl: string | null
   naturalWidth?: number
   naturalHeight?: number
+  imageClassName?: string
 }
 
 interface RenderMetrics {
-  width: number
-  height: number
+  scale: number
+  offsetX: number
+  offsetY: number
   naturalWidth: number
   naturalHeight: number
+}
+
+function computePaintedMetrics(
+  clientWidth: number,
+  clientHeight: number,
+  naturalWidth: number,
+  naturalHeight: number,
+): RenderMetrics {
+  const scale = Math.min(clientWidth / naturalWidth, clientHeight / naturalHeight)
+  const paintedWidth = naturalWidth * scale
+  const paintedHeight = naturalHeight * scale
+
+  return {
+    scale,
+    offsetX: (clientWidth - paintedWidth) / 2,
+    offsetY: (clientHeight - paintedHeight) / 2,
+    naturalWidth,
+    naturalHeight,
+  }
 }
 
 function boxStyle(
@@ -21,16 +42,14 @@ function boxStyle(
   metrics: RenderMetrics,
   detectionClass: 'MILCO' | 'NOMBO',
 ): React.CSSProperties {
-  const { width, height, naturalWidth, naturalHeight } = metrics
-  const scaleX = width / naturalWidth
-  const scaleY = height / naturalHeight
+  const { scale, offsetX, offsetY } = metrics
 
   return {
     position: 'absolute',
-    left: `${detection.x1 * scaleX}px`,
-    top: `${detection.y1 * scaleY}px`,
-    width: `${(detection.x2 - detection.x1) * scaleX}px`,
-    height: `${(detection.y2 - detection.y1) * scaleY}px`,
+    left: `${offsetX + detection.x1 * scale}px`,
+    top: `${offsetY + detection.y1 * scale}px`,
+    width: `${(detection.x2 - detection.x1) * scale}px`,
+    height: `${(detection.y2 - detection.y1) * scale}px`,
     borderWidth: '2px',
     borderStyle: 'solid',
     borderColor:
@@ -49,37 +68,41 @@ export function DetectionOverlay({
   imageUrl,
   naturalWidth: naturalWidthProp,
   naturalHeight: naturalHeightProp,
+  imageClassName,
 }: DetectionOverlayProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const imgRef = useRef<HTMLImageElement>(null)
   const [metrics, setMetrics] = useState<RenderMetrics | null>(null)
 
+  const syncMetrics = useCallback(() => {
+    const img = imgRef.current
+    if (!img) return
+
+    const naturalWidth = img.naturalWidth || naturalWidthProp || 0
+    const naturalHeight = img.naturalHeight || naturalHeightProp || 0
+    if (!naturalWidth || !naturalHeight) return
+
+    const clientWidth = img.clientWidth || naturalWidth
+    const clientHeight =
+      img.clientHeight || (clientWidth / naturalWidth) * naturalHeight
+
+    setMetrics(
+      computePaintedMetrics(clientWidth, clientHeight, naturalWidth, naturalHeight),
+    )
+  }, [naturalWidthProp, naturalHeightProp])
+
   useEffect(() => {
-    if (!containerRef.current || !naturalWidthProp || !naturalHeightProp) return
+    syncMetrics()
 
-    const updateMetrics = (width: number) => {
-      const height = (width / naturalWidthProp) * naturalHeightProp
-      setMetrics({
-        width,
-        height,
-        naturalWidth: naturalWidthProp,
-        naturalHeight: naturalHeightProp,
-      })
-    }
-
-    updateMetrics(containerRef.current.clientWidth || naturalWidthProp)
-
-    if (typeof ResizeObserver === 'undefined') {
+    const target = containerRef.current
+    if (!target || typeof ResizeObserver === 'undefined') {
       return
     }
 
-    const observer = new ResizeObserver(([entry]) => {
-      const { width } = entry.contentRect
-      if (width > 0) updateMetrics(width)
-    })
-
-    observer.observe(containerRef.current)
+    const observer = new ResizeObserver(() => syncMetrics())
+    observer.observe(target)
     return () => observer.disconnect()
-  }, [naturalWidthProp, naturalHeightProp, imageUrl])
+  }, [syncMetrics, imageUrl])
 
   if (!imageUrl) {
     return (
@@ -92,6 +115,8 @@ export function DetectionOverlay({
     )
   }
 
+  const imageClasses = ['block h-auto w-full', imageClassName].filter(Boolean).join(' ')
+
   return (
     <div
       ref={containerRef}
@@ -99,20 +124,11 @@ export function DetectionOverlay({
       className="relative w-full overflow-hidden rounded-lg bg-[color:var(--navi-image-bg)]"
     >
       <img
+        ref={imgRef}
         src={imageUrl}
         alt="Imagem de sonar analisada"
-        className="block h-auto w-full"
-        onLoad={(event) => {
-          const img = event.currentTarget
-          const width = containerRef.current?.clientWidth ?? img.clientWidth
-          const height = img.clientHeight
-          setMetrics({
-            width,
-            height,
-            naturalWidth: img.naturalWidth,
-            naturalHeight: img.naturalHeight,
-          })
-        }}
+        className={imageClasses}
+        onLoad={syncMetrics}
       />
       {metrics
         ? detections.map((detection, index) => {
