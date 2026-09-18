@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ResultadoPage } from './ResultadoPage'
@@ -38,7 +38,7 @@ describe('ResultadoPage', () => {
     vi.mocked(getAnalysis).mockReset()
   })
 
-  it('renders detections with confidence and class badges', async () => {
+  it('renders tabbed side panel with detections in Métricas tab', async () => {
     vi.mocked(getAnalysis).mockResolvedValue({
       ...baseAnalysis,
       image_url: 'https://example.com/sonar.png',
@@ -50,14 +50,18 @@ describe('ResultadoPage', () => {
 
     renderResultado()
 
-    expect(await screen.findByText('Alvo A')).toBeInTheDocument()
+    expect(await screen.findByRole('tab', { name: 'Métricas' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
+    expect(screen.getByText('Alvo A')).toBeInTheDocument()
     expect(screen.getByText(/Confiança 85\.0%/)).toBeInTheDocument()
     expect(screen.getByText('Alvo B')).toBeInTheDocument()
-    expect(screen.getAllByText('MILCO').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('NOMBO').length).toBeGreaterThan(0)
+    expect(screen.getByTestId('detection-badge-milco')).toBeInTheDocument()
+    expect(screen.getByTestId('detection-badge-nombo')).toBeInTheDocument()
   })
 
-  it('shows empty detections treatment', async () => {
+  it('shows empty detections treatment in Métricas tab', async () => {
     vi.mocked(getAnalysis).mockResolvedValue({
       ...baseAnalysis,
       image_url: 'https://example.com/sonar.png',
@@ -69,9 +73,10 @@ describe('ResultadoPage', () => {
     expect(
       await screen.findByText('Nenhuma detecção encontrada nesta imagem.'),
     ).toBeInTheDocument()
+    expect(screen.getByTestId('metric-total')).toHaveTextContent('0')
   })
 
-  it('shows placeholder when image_url is null', async () => {
+  it('shows placeholder when image_url is null and still renders side panel', async () => {
     vi.mocked(getAnalysis).mockResolvedValue({
       ...baseAnalysis,
       image_url: null,
@@ -87,6 +92,37 @@ describe('ResultadoPage', () => {
         'Imagem indisponível',
       )
     })
+    expect(screen.getByRole('tab', { name: 'Métricas' })).toBeInTheDocument()
     expect(screen.getByText('Alvo')).toBeInTheDocument()
+  })
+
+  it('switches to Explicação tab with empty state', async () => {
+    vi.mocked(getAnalysis).mockResolvedValue({
+      ...baseAnalysis,
+      image_url: 'https://example.com/sonar.png',
+      detections: [],
+    })
+
+    renderResultado()
+
+    fireEvent.click(await screen.findByRole('tab', { name: 'Explicação' }))
+
+    expect(
+      screen.getByText('Nenhuma explicação disponível.'),
+    ).toBeInTheDocument()
+  })
+
+  it('constrains overlay image to max 70vh', async () => {
+    vi.mocked(getAnalysis).mockResolvedValue({
+      ...baseAnalysis,
+      image_url: 'https://example.com/sonar.png',
+      detections: [],
+    })
+
+    renderResultado()
+
+    const img = await screen.findByAltText('Imagem de sonar analisada')
+    expect(img).toHaveClass('max-h-[70vh]')
+    expect(img).toHaveClass('object-contain')
   })
 })

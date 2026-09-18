@@ -2,35 +2,11 @@ import { useEffect, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 import { getAnalysis, type AnalysisResult } from '../api/analyses'
 import { DetectionOverlay } from '../components/DetectionOverlay'
-import { classifyDetection } from '../domain/classification'
 import { shortId } from '../domain/idDisplay'
+import { ResultadoSidePanel } from './resultado/ResultadoSidePanel'
 
 interface ResultadoLocationState {
   analysis?: AnalysisResult
-}
-
-function DetectionBadge({ confidence }: { confidence: number }) {
-  const detectionClass = classifyDetection({
-    x1: 0,
-    y1: 0,
-    x2: 0,
-    y2: 0,
-    confidence,
-    label: '',
-  })
-
-  return (
-    <span
-      className={[
-        'rounded px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide',
-        detectionClass === 'MILCO'
-          ? 'bg-[color-mix(in_srgb,var(--navi-milco)_20%,transparent)] text-[color:var(--navi-milco)]'
-          : 'bg-[color-mix(in_srgb,var(--navi-nombo)_20%,transparent)] text-[color:var(--navi-nombo)]',
-      ].join(' ')}
-    >
-      {detectionClass}
-    </span>
-  )
 }
 
 export function ResultadoPage() {
@@ -80,53 +56,27 @@ export function ResultadoPage() {
   const detections = analysis.detections
 
   return (
-    <div className="px-9 py-8">
+    <div className="px-9 py-6">
       <p className="text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]">
         Resultado
       </p>
-      <h1 className="pt-1.5 font-serif text-[30px] leading-[42px] text-[color:var(--navi-text)]">
+      <h1 className="pt-1 font-serif text-[28px] leading-[36px] text-[color:var(--navi-text)]">
         Resultado da análise
       </h1>
       <p className="pt-1 font-mono text-sm text-[color:var(--navi-muted)]">
         ID {shortId(analysis.id)}
       </p>
 
-      <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px]">
-        <DetectionOverlay
-          detections={detections}
-          imageUrl={analysis.image_url}
-        />
-
-        <div className="rounded-[10px] border border-[color:var(--navi-border-subtle)] bg-[color:var(--navi-panel)] p-5">
-          <p className="text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]">
-            Detecções ({detections.length})
-          </p>
-
-          {detections.length === 0 ? (
-            <p className="pt-4 text-sm text-[color:var(--navi-muted)]">
-              Nenhuma detecção encontrada nesta imagem.
-            </p>
-          ) : (
-            <ul className="mt-4 space-y-3">
-              {detections.map((detection, index) => (
-                <li
-                  key={`${detection.x1}-${detection.y1}-${index}`}
-                  className="flex items-center justify-between rounded-md border border-[color:var(--navi-border-subtle)] bg-[color:var(--navi-input-bg)] px-3 py-2.5"
-                >
-                  <div>
-                    <p className="text-sm font-medium text-[color:var(--navi-text)]">
-                      {detection.label || `Detecção ${index + 1}`}
-                    </p>
-                    <p className="font-mono text-xs text-[color:var(--navi-muted)]">
-                      Confiança {(detection.confidence * 100).toFixed(1)}%
-                    </p>
-                  </div>
-                  <DetectionBadge confidence={detection.confidence} />
-                </li>
-              ))}
-            </ul>
-          )}
+      <div className="mt-6 grid grid-cols-1 items-start gap-6 lg:grid-cols-[1fr_360px] lg:gap-6">
+        <div className="max-h-[70vh] min-h-0 overflow-hidden">
+          <DetectionOverlay
+            detections={detections}
+            imageUrl={analysis.image_url}
+            imageClassName="max-h-[70vh] object-contain"
+          />
         </div>
+
+        <ResultadoSidePanel analysis={analysis} />
       </div>
     </div>
   )
