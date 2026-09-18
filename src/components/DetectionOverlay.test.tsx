@@ -77,7 +77,7 @@ describe('DetectionOverlay', () => {
     )
 
     const img = screen.getByRole('img', { name: /sonar analisada/i })
-    mockImageMetrics(img, {
+    mockImageMetrics(img as HTMLImageElement, {
       clientWidth: 200,
       clientHeight: 200,
       naturalWidth: 400,
