@@ -9,6 +9,7 @@ vi.mock('../api/analyses', () => ({
 }))
 
 import { createAnalysis } from '../api/analyses'
+import { resetCreateAnalysisOnce } from '../upload/createAnalysisOnce'
 import { setPendingUploadFile } from '../upload/pendingFile'
 
 function renderLoading(initialEntries: { pathname: string; state?: unknown }[]) {
@@ -30,6 +31,7 @@ function createFile(): File {
 describe('LoadingPage', () => {
   beforeEach(() => {
     vi.mocked(createAnalysis).mockReset()
+    resetCreateAnalysisOnce()
   })
 
   it('redirects to nova when no pending file is available', async () => {
@@ -59,6 +61,40 @@ describe('LoadingPage', () => {
       expect(screen.getByText('Result Page')).toBeInTheDocument()
     })
     expect(createAnalysis).toHaveBeenCalledWith(file)
+  })
+
+  it('posts createAnalysis only once under React Strict Mode remount', async () => {
+    let resolveUpload!: (value: unknown) => void
+    const uploadPromise = new Promise((resolve) => {
+      resolveUpload = resolve
+    })
+    vi.mocked(createAnalysis).mockReturnValue(uploadPromise as never)
+
+    const file = createFile()
+    const { unmount } = renderLoading([
+      { pathname: '/analises/loading', state: { file } },
+    ])
+    // Simulate Strict Mode: cleanup then remount with the same file.
+    unmount()
+    renderLoading([{ pathname: '/analises/loading', state: { file } }])
+
+    resolveUpload({
+      id: 'analysis-strict',
+      org_id: 'org',
+      user_id: 'user',
+      status: 'succeeded',
+      detections: [],
+      image_content_type: 'image/png',
+      image_s3_key: 'key',
+      image_url: 'https://example.com/sonar.png',
+      created_at: new Date().toISOString(),
+      inference_ms: 100,
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('Result Page')).toBeInTheDocument()
+    })
+    expect(createAnalysis).toHaveBeenCalledTimes(1)
   })
 
   it('returns to nova with API error message on failure', async () => {

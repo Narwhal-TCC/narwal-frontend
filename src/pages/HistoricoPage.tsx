@@ -8,6 +8,7 @@ import {
 } from '../api/analyses'
 import { analysisHasClass, type DetectionClass } from '../domain/classification'
 import { shortId } from '../domain/idDisplay'
+import { formatDeteccaoCount } from '../domain/ptPlural'
 
 const PAGE_SIZE = 50
 
@@ -152,7 +153,7 @@ export function HistoricoPage() {
                   </p>
                 </div>
                 <div className="text-right text-sm text-[color:var(--navi-link)]">
-                  <p>{summary.detection_count} detecções</p>
+                  <p>{formatDeteccaoCount(summary.detection_count)}</p>
                   {detail ? (
                     <p className="pt-0.5 text-xs text-[color:var(--navi-muted)]">
                       {detail.detections.filter((d) => d.confidence >= 0.8).length} MILCO

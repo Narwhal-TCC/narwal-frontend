@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getAnalysis, listAnalyses } from '../api/analyses'
+import { formatDeteccaoCount } from '../domain/ptPlural'
 import { analysisHasClass, countMilco } from '../domain/classification'
 import { shortId } from '../domain/idDisplay'
 
@@ -219,7 +220,9 @@ export function HomePage() {
 
       <section aria-label="Análises recentes" className="mt-7">
         <h2 className="text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]">
-          Análises recentes
+          {data.recentAnalyses.length === 1
+            ? 'Análise recente'
+            : 'Análises recentes'}
         </h2>
 
         {isLoading ? (
@@ -250,7 +253,7 @@ export function HomePage() {
                   </div>
                   <div className="flex items-center gap-3 text-right">
                     <p className="text-sm text-[color:var(--navi-link)]">
-                      {row.detection_count} detecções
+                      {formatDeteccaoCount(row.detection_count)}
                     </p>
                     {row.hasMilco ? (
                       <span className="rounded px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide bg-[color-mix(in_srgb,var(--navi-milco)_20%,transparent)] text-[color:var(--navi-milco)]">

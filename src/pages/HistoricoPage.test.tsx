@@ -73,6 +73,8 @@ describe('HistoricoPage', () => {
 
     expect(await screen.findByText('aaaaaaaa')).toBeInTheDocument()
     expect(screen.getByText('bbbbbbbb')).toBeInTheDocument()
+    expect(screen.getByText('2 detecções')).toBeInTheDocument()
+    expect(screen.getByText('1 detecção')).toBeInTheDocument()
   })
 
   it('filters to analyses with NOMBO detections', async () => {

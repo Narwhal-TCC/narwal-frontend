@@ -56,10 +56,10 @@ function boxStyle(
       detectionClass === 'MILCO'
         ? 'var(--navi-milco)'
         : 'var(--navi-nombo)',
-    backgroundColor:
-      detectionClass === 'MILCO'
-        ? 'color-mix(in srgb, var(--navi-milco) 15%, transparent)'
-        : 'color-mix(in srgb, var(--navi-nombo) 15%, transparent)',
+    // Border only — fills wash the sonar when a box covers most/all of the frame.
+    backgroundColor: 'transparent',
+    boxSizing: 'border-box',
+    pointerEvents: 'none',
   }
 }
 

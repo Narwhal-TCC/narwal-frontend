@@ -60,9 +60,13 @@ describe('ResultadoMetricsTab', () => {
       />,
     )
 
-    expect(screen.getByText('Alvo A')).toBeInTheDocument()
+    expect(screen.getByText('Detecções (2)')).toBeInTheDocument()
+    // Title and badge both use AD-003 heuristic, not API label
+    // (plus Resumo metric card labels → ≥2 each).
+    expect(screen.getAllByText('MILCO').length).toBeGreaterThanOrEqual(2)
+    expect(screen.getAllByText('NOMBO').length).toBeGreaterThanOrEqual(2)
     expect(screen.getByText(/Confiança 85\.0%/)).toBeInTheDocument()
-    expect(screen.getByText('Alvo B')).toBeInTheDocument()
+    expect(screen.getByText(/Confiança 50\.0%/)).toBeInTheDocument()
 
     expect(screen.getByTestId('detection-badge-milco')).toHaveClass(
       'text-[color:var(--navi-milco)]',
@@ -70,5 +74,28 @@ describe('ResultadoMetricsTab', () => {
     expect(screen.getByTestId('detection-badge-nombo')).toHaveClass(
       'text-[color:var(--navi-nombo)]',
     )
+  })
+
+  it('uses singular Detecção heading for one item and matches badge class', () => {
+    render(
+      <ResultadoMetricsTab
+        analysis={{
+          ...baseAnalysis,
+          detections: [
+            { x1: 0, y1: 0, x2: 1, y2: 1, confidence: 0.605, label: 'MILCO' },
+          ],
+        }}
+      />,
+    )
+
+    expect(screen.getByText('Detecção (1)')).toBeInTheDocument()
+    expect(screen.queryByText('Detecções (1)')).not.toBeInTheDocument()
+    // API label MILCO but confidence < 0.80 → list title + badge are NOMBO
+    expect(screen.getByTestId('detection-badge-nombo')).toBeInTheDocument()
+    expect(screen.queryByTestId('detection-badge-milco')).not.toBeInTheDocument()
+    const listTitle = screen.getByText('NOMBO', {
+      selector: 'li p.text-sm',
+    })
+    expect(listTitle).toBeInTheDocument()
   })
 })

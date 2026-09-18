@@ -28,12 +28,13 @@
 
 ## Handoff
 
-- **Feature**: navi-frontend (`.specs/features/navi-frontend/`)
+- **Feature**: navi-ui-polish (`.specs/features/navi-ui-polish/`)
 - **Phase / Task**: Execute complete — Verifier PASS
-- **Completed**: T1–T21 + fix iteration 1 (`dad3795`); validation PASS (`validate_state` 0 errors)
-- **In-progress**: Interactive UAT (awaiting user)
-- **Next step**: Walk UAT with user against local backend; optional push when asked
+- **Completed**: T1–T8 + validation.md PASS (`validate_state` 0 errors); commits `a12e9fb`…`a332aa6`
+- **In-progress**: none
+- **Next step**: optional hardening from validation Fix Plans; push only if requested
 - **Blockers**: none
-- **Uncommitted files**: tasks.md status Complete; spec Verified; validation.md
-- **Branch**: master
-- **Commits**: `55b56d4`…`dad3795` (22 commits); 59 tests
+- **Uncommitted files**: `.specs/STATE.md` (handoff); lessons candidates added
+- **Branch**: master (ahead of origin by 8)
+- **Prior feature**: navi-frontend Verifier PASS (`dad3795`)
+- **Workers**: [Batch A](2f7ed779-0114-4296-8ad4-694ca04aaa79) T1–T3; [Batch B](6a9643dd-8996-49f8-aba7-52ec805da9f4) T4–T8; [Verifier](e8fcba42-15e7-4874-bc3c-8438fe584e50)

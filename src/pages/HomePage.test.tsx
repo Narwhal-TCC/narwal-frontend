@@ -143,10 +143,51 @@ describe('HomePage', () => {
       expect(screen.getByRole('region', { name: /análises recentes/i })).toBeInTheDocument()
     })
 
-    const rows = screen.getAllByRole('button', { name: /detecções/i })
+    const rows = screen.getAllByRole('button', { name: /detecç/i })
     expect(rows.length).toBe(5)
     expect(screen.getByText('00000000')).toBeInTheDocument()
     expect(screen.queryByText('00000005')).not.toBeInTheDocument()
+    // index+1 counts: first row is singular
+    expect(screen.getByText('1 detecção')).toBeInTheDocument()
+    expect(screen.getByText('2 detecções')).toBeInTheDocument()
+  })
+
+  it('uses singular Análise recente heading for one item', async () => {
+    const now = new Date().toISOString()
+    vi.mocked(listAnalyses).mockResolvedValue({
+      items: [
+        {
+          id: '01234567-89ab-cdef-0123-456789abcdef',
+          org_id: 'org-1',
+          user_id: 'user-1',
+          status: 'succeeded',
+          created_at: now,
+          inference_ms: 100,
+          detection_count: 1,
+        },
+      ],
+      limit: 50,
+      offset: 0,
+    })
+    vi.mocked(getAnalysis).mockResolvedValue({
+      id: '01234567-89ab-cdef-0123-456789abcdef',
+      org_id: 'org-1',
+      user_id: 'user-1',
+      status: 'succeeded',
+      detections: [],
+      image_content_type: 'image/png',
+      image_s3_key: 'key',
+      image_url: null,
+      created_at: now,
+      inference_ms: 100,
+    })
+
+    renderHome()
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Análise recente' })).toBeInTheDocument()
+    })
+    expect(screen.getByText('1 detecção')).toBeInTheDocument()
   })
 
   it('shows MILCO badge when heuristic matches and navigates to resultado', async () => {

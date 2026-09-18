@@ -106,7 +106,9 @@ export function ResultadoMetricsTab({ analysis }: { analysis: AnalysisResult }) 
 
       <div className="border-t border-[color:var(--navi-border-subtle)] pt-4">
         <p className="text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]">
-          Detecções ({detections.length})
+          {detections.length === 1
+            ? `Detecção (${detections.length})`
+            : `Detecções (${detections.length})`}
         </p>
 
         {detections.length === 0 ? (
@@ -115,22 +117,26 @@ export function ResultadoMetricsTab({ analysis }: { analysis: AnalysisResult }) 
           </p>
         ) : (
           <ul className="mt-4 space-y-3">
-            {detections.map((detection, index) => (
-              <li
-                key={`${detection.x1}-${detection.y1}-${index}`}
-                className="flex items-center justify-between rounded-md border border-[color:var(--navi-border-subtle)] bg-[color:var(--navi-input-bg)] px-3 py-2.5"
-              >
-                <div>
-                  <p className="text-sm font-medium text-[color:var(--navi-text)]">
-                    {detection.label || `Detecção ${index + 1}`}
-                  </p>
-                  <p className="font-mono text-xs text-[color:var(--navi-muted)]">
-                    Confiança {(detection.confidence * 100).toFixed(1)}%
-                  </p>
-                </div>
-                <DetectionBadge detection={detection} />
-              </li>
-            ))}
+            {detections.map((detection, index) => {
+              // AD-003: UI class is the confidence heuristic, not API label.
+              const detectionClass = classifyDetection(detection)
+              return (
+                <li
+                  key={`${detection.x1}-${detection.y1}-${index}`}
+                  className="flex items-center justify-between rounded-md border border-[color:var(--navi-border-subtle)] bg-[color:var(--navi-input-bg)] px-3 py-2.5"
+                >
+                  <div>
+                    <p className="text-sm font-medium text-[color:var(--navi-text)]">
+                      {detectionClass}
+                    </p>
+                    <p className="font-mono text-xs text-[color:var(--navi-muted)]">
+                      Confiança {(detection.confidence * 100).toFixed(1)}%
+                    </p>
+                  </div>
+                  <DetectionBadge detection={detection} />
+                </li>
+              )
+            })}
           </ul>
         )}
       </div>

@@ -54,9 +54,9 @@ describe('ResultadoPage', () => {
       'aria-selected',
       'true',
     )
-    expect(screen.getByText('Alvo A')).toBeInTheDocument()
+    expect(screen.getAllByText('MILCO').length).toBeGreaterThanOrEqual(1)
     expect(screen.getByText(/Confiança 85\.0%/)).toBeInTheDocument()
-    expect(screen.getByText('Alvo B')).toBeInTheDocument()
+    expect(screen.getAllByText('NOMBO').length).toBeGreaterThanOrEqual(1)
     expect(screen.getByTestId('detection-badge-milco')).toBeInTheDocument()
     expect(screen.getByTestId('detection-badge-nombo')).toBeInTheDocument()
   })
@@ -93,7 +93,7 @@ describe('ResultadoPage', () => {
       )
     })
     expect(screen.getByRole('tab', { name: 'Métricas' })).toBeInTheDocument()
-    expect(screen.getByText('Alvo')).toBeInTheDocument()
+    expect(screen.getAllByText('MILCO').length).toBeGreaterThanOrEqual(1)
   })
 
   it('switches to Explicação tab with empty state', async () => {
@@ -124,5 +124,25 @@ describe('ResultadoPage', () => {
     const img = await screen.findByAltText('Imagem de sonar analisada')
     expect(img).toHaveClass('max-h-[70vh]')
     expect(img).toHaveClass('object-contain')
+  })
+
+  it('hydrates image_url via GET when navigation state omitted it', async () => {
+    vi.mocked(getAnalysis).mockResolvedValue({
+      ...baseAnalysis,
+      image_url: 'https://example.com/presigned.png',
+      detections: [],
+    })
+
+    renderResultado(undefined, {
+      analysis: {
+        ...baseAnalysis,
+        image_url: null,
+        detections: [],
+      },
+    })
+
+    const img = await screen.findByAltText('Imagem de sonar analisada')
+    expect(img).toHaveAttribute('src', 'https://example.com/presigned.png')
+    expect(getAnalysis).toHaveBeenCalledWith(baseAnalysis.id)
   })
 })

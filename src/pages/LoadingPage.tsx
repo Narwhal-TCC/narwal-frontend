@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { createAnalysis } from '../api/analyses'
 import { ApiError } from '../api/client'
+import { createAnalysisOnce } from '../upload/createAnalysisOnce'
 import {
   clearPendingUploadFile,
   getPendingUploadFile,
@@ -27,7 +28,8 @@ export function LoadingPage() {
 
     let cancelled = false
 
-    createAnalysis(file)
+    // Shared promise across Strict Mode remount so POST /analyses runs once.
+    createAnalysisOnce(file, createAnalysis)
       .then((result) => {
         if (cancelled) return
         clearPendingUploadFile()

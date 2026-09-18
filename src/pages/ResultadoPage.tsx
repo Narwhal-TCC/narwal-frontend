@@ -13,19 +13,24 @@ export function ResultadoPage() {
   const { id } = useParams<{ id: string }>()
   const location = useLocation()
   const state = location.state as ResultadoLocationState | null
-  const [analysis, setAnalysis] = useState<AnalysisResult | null>(
-    state?.analysis ?? null,
-  )
+  const seeded =
+    state?.analysis && state.analysis.id === id ? state.analysis : null
+  // Create POST may omit image_url; keep loading until GET hydrates it.
+  const [analysis, setAnalysis] = useState<AnalysisResult | null>(seeded)
   const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(!state?.analysis)
+  const [isLoading, setIsLoading] = useState(!seeded?.image_url)
 
   useEffect(() => {
-    if (state?.analysis || !id) return
+    if (!id) return
+    if (seeded?.image_url) return
 
     let cancelled = false
     getAnalysis(id)
       .then((result) => {
-        if (!cancelled) setAnalysis(result)
+        if (!cancelled) {
+          setAnalysis(result)
+          setError(null)
+        }
       })
       .catch(() => {
         if (!cancelled) setError('Não foi possível carregar o resultado.')
@@ -37,7 +42,7 @@ export function ResultadoPage() {
     return () => {
       cancelled = true
     }
-  }, [id, state?.analysis])
+  }, [id, seeded?.image_url])
 
   if (isLoading && !analysis) {
     return (
