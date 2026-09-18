@@ -42,6 +42,15 @@ describe('Sidebar', () => {
     vi.mocked(meApi).mockResolvedValue(mockProfile)
   })
 
+  it('fills the viewport height with a sticky rail', () => {
+    renderSidebar()
+
+    const sidebar = screen.getByRole('complementary')
+    expect(sidebar.className).toMatch(/\bh-screen\b/)
+    expect(sidebar.className).toMatch(/\bsticky\b/)
+    expect(sidebar.className).toMatch(/\btop-0\b/)
+  })
+
   it('renders navigation targets for overview, new analysis, and history', () => {
     renderSidebar()
 
