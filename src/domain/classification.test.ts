@@ -30,3 +30,19 @@ describe('analysisHasClass and countMilco', () => {
     expect(countMilco([])).toBe(0)
   })
 })
+
+describe('detector_score optional field', () => {
+  it('accepts detections that include detector_score', () => {
+    const withScore: Detection = {
+      x1: 0,
+      y1: 0,
+      x2: 10,
+      y2: 10,
+      confidence: 0.9,
+      label: 'MILCO',
+      detector_score: 0.85,
+    }
+    expect(withScore.detector_score).toBe(0.85)
+    expect(classifyDetection(withScore)).toBe('MILCO')
+  })
+})

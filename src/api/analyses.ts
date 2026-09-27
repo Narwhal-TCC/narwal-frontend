@@ -7,6 +7,7 @@ export interface Detection {
   y2: number
   confidence: number
   label: string
+  detector_score?: number
 }
 
 export interface AnalysisSummary {
