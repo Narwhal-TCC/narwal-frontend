@@ -57,6 +57,24 @@ describe('NovaAnalisePage', () => {
     expect(createAnalysis).not.toHaveBeenCalled()
   })
 
+  it('renders editable collection metadata fields', () => {
+    renderNova()
+
+    const coordinates = screen.getByLabelText('Coordenadas')
+    const collectedAt = screen.getByLabelText('Data e hora da coleta')
+    const campaign = screen.getByLabelText('Campanha')
+
+    expect(coordinates).toHaveValue("23°58'S 43°10'W")
+    expect(collectedAt).toHaveAttribute('type', 'datetime-local')
+    expect(campaign).toHaveValue('Levantamento Santos 2026')
+
+    fireEvent.change(coordinates, { target: { value: "24°00'S 44°00'W" } })
+    fireEvent.change(campaign, { target: { value: 'Campanha teste' } })
+
+    expect(coordinates).toHaveValue("24°00'S 44°00'W")
+    expect(campaign).toHaveValue('Campanha teste')
+  })
+
   it('accepts a valid PNG and navigates to loading', async () => {
     renderNova()
     const input = document.querySelector('input[type="file"]') as HTMLInputElement

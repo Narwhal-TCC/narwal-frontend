@@ -8,6 +8,12 @@ interface DetectionOverlayProps {
   naturalWidth?: number
   naturalHeight?: number
   imageClassName?: string
+  highlightedIndex?: number | null
+}
+
+function formatBoxLabel(detectionClass: 'MILCO' | 'NOMBO', confidence: number): string {
+  const percent = (confidence * 100).toFixed(1)
+  return `${detectionClass} ${percent}%`
 }
 
 interface RenderMetrics {
@@ -37,29 +43,53 @@ function computePaintedMetrics(
   }
 }
 
-function boxStyle(
+function classColor(detectionClass: 'MILCO' | 'NOMBO'): string {
+  return detectionClass === 'MILCO' ? 'var(--navi-milco)' : 'var(--navi-nombo)'
+}
+
+function boxPlacement(
   detection: Detection,
   metrics: RenderMetrics,
-  detectionClass: 'MILCO' | 'NOMBO',
-): React.CSSProperties {
+): Pick<React.CSSProperties, 'left' | 'top' | 'width' | 'height'> {
   const { scale, offsetX, offsetY } = metrics
-
   return {
-    position: 'absolute',
     left: `${offsetX + detection.x1 * scale}px`,
     top: `${offsetY + detection.y1 * scale}px`,
     width: `${(detection.x2 - detection.x1) * scale}px`,
     height: `${(detection.y2 - detection.y1) * scale}px`,
-    borderWidth: '2px',
+  }
+}
+
+function frameStyle(
+  color: string,
+  emphasis: 'default' | 'highlighted' | 'dimmed',
+): React.CSSProperties {
+  const isHighlighted = emphasis === 'highlighted'
+  return {
+    width: '100%',
+    height: '100%',
     borderStyle: 'solid',
-    borderColor:
-      detectionClass === 'MILCO'
-        ? 'var(--navi-milco)'
-        : 'var(--navi-nombo)',
-    // Border only — fills wash the sonar when a box covers most/all of the frame.
+    borderColor: color,
+    borderWidth: '3px',
     backgroundColor: 'transparent',
     boxSizing: 'border-box',
-    pointerEvents: 'none',
+  }
+}
+
+function labelStyle(
+  color: string,
+  emphasis: 'default' | 'highlighted' | 'dimmed',
+): React.CSSProperties {
+  const isHighlighted = emphasis === 'highlighted'
+  return {
+    backgroundColor: color,
+    color: 'var(--navi-button-text)',
+    fontSize: isHighlighted ? '14px' : '12px',
+    padding: isHighlighted ? '4px 8px' : '3px 7px',
+    lineHeight: 1.2,
+    fontWeight: 700,
+    letterSpacing: '0.04em',
+    textTransform: 'uppercase',
   }
 }
 
@@ -69,6 +99,7 @@ export function DetectionOverlay({
   naturalWidth: naturalWidthProp,
   naturalHeight: naturalHeightProp,
   imageClassName,
+  highlightedIndex = null,
 }: DetectionOverlayProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const imgRef = useRef<HTMLImageElement>(null)
@@ -115,13 +146,15 @@ export function DetectionOverlay({
     )
   }
 
-  const imageClasses = ['block h-auto w-full', imageClassName].filter(Boolean).join(' ')
+  const imageClasses = ['block h-auto w-full rounded-lg', imageClassName]
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <div
       ref={containerRef}
       data-testid="detection-overlay"
-      className="relative w-full overflow-hidden rounded-lg bg-[color:var(--navi-image-bg)]"
+      className="relative w-full overflow-visible rounded-lg bg-[color:var(--navi-image-bg)]"
     >
       <img
         ref={imgRef}
@@ -133,13 +166,46 @@ export function DetectionOverlay({
       {metrics
         ? detections.map((detection, index) => {
             const detectionClass = classifyDetection(detection)
+            const isHighlighted = highlightedIndex === index
+            const isDimmed =
+              highlightedIndex !== null && highlightedIndex !== index
+            const emphasis = isHighlighted
+              ? 'highlighted'
+              : isDimmed
+                ? 'dimmed'
+                : 'default'
+            const label = formatBoxLabel(detectionClass, detection.confidence)
+            const color = classColor(detectionClass)
+            const placement = boxPlacement(detection, metrics)
+
             return (
               <div
                 key={`${detection.x1}-${detection.y1}-${index}`}
                 data-testid="detection-box"
                 data-class={detectionClass}
-                style={boxStyle(detection, metrics, detectionClass)}
-              />
+                data-highlighted={isHighlighted ? 'true' : 'false'}
+                style={{
+                  position: 'absolute',
+                  ...placement,
+                  pointerEvents: 'none',
+                  overflow: 'visible',
+                  opacity: isDimmed ? 0.38 : 1,
+                  zIndex: isHighlighted ? 2 : 1,
+                }}
+              >
+                <span
+                  data-testid="detection-box-label"
+                  className="absolute bottom-full left-1/2 mb-1 w-max max-w-none -translate-x-1/2 whitespace-nowrap rounded-sm"
+                  style={labelStyle(color, emphasis)}
+                >
+                  {label}
+                </span>
+                <div
+                  data-testid="detection-box-frame"
+                  aria-hidden
+                  style={frameStyle(color, emphasis)}
+                />
+              </div>
             )
           })
         : null}

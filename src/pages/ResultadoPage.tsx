@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 import { getAnalysis, type AnalysisResult } from '../api/analyses'
+import { DetectionClassLegend } from '../components/DetectionClassLegend'
 import { DetectionOverlay } from '../components/DetectionOverlay'
 import { shortId } from '../domain/idDisplay'
 import { ResultadoSidePanel } from './resultado/ResultadoSidePanel'
@@ -19,6 +20,13 @@ export function ResultadoPage() {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(seeded)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(!seeded?.image_url)
+  const [highlightedDetectionIndex, setHighlightedDetectionIndex] = useState<
+    number | null
+  >(null)
+
+  const handleHighlightDetection = useCallback((index: number | null) => {
+    setHighlightedDetectionIndex(index)
+  }, [])
 
   useEffect(() => {
     if (!id) return
@@ -73,15 +81,23 @@ export function ResultadoPage() {
       </p>
 
       <div className="mt-6 grid grid-cols-1 items-start gap-6 lg:grid-cols-[1fr_360px] lg:gap-6">
-        <div className="max-h-[70vh] min-h-0 overflow-hidden">
-          <DetectionOverlay
-            detections={detections}
-            imageUrl={analysis.image_url}
-            imageClassName="max-h-[70vh] object-contain"
-          />
+        <div className="min-h-0">
+          <div className="max-h-[70vh] overflow-hidden">
+            <DetectionOverlay
+              detections={detections}
+              imageUrl={analysis.image_url}
+              imageClassName="max-h-[70vh] object-contain"
+              highlightedIndex={highlightedDetectionIndex}
+            />
+          </div>
+          <DetectionClassLegend />
         </div>
 
-        <ResultadoSidePanel analysis={analysis} />
+        <ResultadoSidePanel
+          analysis={analysis}
+          highlightedDetectionIndex={highlightedDetectionIndex}
+          onHighlightDetection={handleHighlightDetection}
+        />
       </div>
     </div>
   )

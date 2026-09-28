@@ -54,7 +54,17 @@ function MetricCard({
   )
 }
 
-export function ResultadoMetricsTab({ analysis }: { analysis: AnalysisResult }) {
+interface ResultadoMetricsTabProps {
+  analysis: AnalysisResult
+  highlightedDetectionIndex?: number | null
+  onHighlightDetection?: (index: number | null) => void
+}
+
+export function ResultadoMetricsTab({
+  analysis,
+  highlightedDetectionIndex = null,
+  onHighlightDetection,
+}: ResultadoMetricsTabProps) {
   const detections = analysis.detections
   const milcoCount = countMilco(detections)
   const nomboCount = countNombo(detections)
@@ -123,7 +133,18 @@ export function ResultadoMetricsTab({ analysis }: { analysis: AnalysisResult }) 
               return (
                 <li
                   key={`${detection.x1}-${detection.y1}-${index}`}
-                  className="flex items-center justify-between rounded-md border border-[color:var(--navi-border-subtle)] bg-[color:var(--navi-input-bg)] px-3 py-2.5"
+                  data-testid={`detection-row-${index}`}
+                  tabIndex={0}
+                  onMouseEnter={() => onHighlightDetection?.(index)}
+                  onMouseLeave={() => onHighlightDetection?.(null)}
+                  onFocus={() => onHighlightDetection?.(index)}
+                  onBlur={() => onHighlightDetection?.(null)}
+                  className={[
+                    'flex cursor-default items-center justify-between rounded-md border px-3 py-2.5 outline-none transition-colors',
+                    highlightedDetectionIndex === index
+                      ? 'border-[color:var(--navi-link-active)] bg-[color-mix(in_srgb,var(--navi-link-active)_12%,var(--navi-input-bg))] ring-1 ring-[color:var(--navi-link-active)]'
+                      : 'border-[color:var(--navi-border-subtle)] bg-[color:var(--navi-input-bg)] hover:border-[color:var(--navi-link)]',
+                  ].join(' ')}
                 >
                   <div>
                     <p className="text-sm font-medium text-[color:var(--navi-text)]">

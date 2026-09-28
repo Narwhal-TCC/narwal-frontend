@@ -5,6 +5,9 @@ import { icoUploadDrop } from '../assets'
 import { validateUploadFile } from '../domain/uploadValidation'
 import { setPendingUploadFile } from '../upload/pendingFile'
 
+const COLLECTION_FIELD_CLASS =
+  'w-full rounded-md border border-[color:var(--navi-border-strong)] bg-[color:var(--navi-input-bg)] px-3 py-2.5 font-mono text-sm text-[color:var(--navi-text)] placeholder:text-[color:var(--navi-muted)]'
+
 export function NovaAnalisePage() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -13,6 +16,9 @@ export function NovaAnalisePage() {
   const [error, setError] = useState<string | null>(
     (location.state as { error?: string } | null)?.error ?? null,
   )
+  const [coordinates, setCoordinates] = useState("23°58'S 43°10'W")
+  const [collectedAt, setCollectedAt] = useState('2026-03-15T14:30')
+  const [campaign, setCampaign] = useState('Levantamento Santos 2026')
 
   const handleFile = (file: File | null) => {
     if (!file) return
@@ -98,26 +104,53 @@ export function NovaAnalisePage() {
             </p>
             <div className="mt-4 space-y-3.5">
               <div>
-                <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]">
+                <label
+                  htmlFor="collection-coordinates"
+                  className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]"
+                >
                   Coordenadas
                 </label>
-                <div className="rounded-md border border-[color:var(--navi-border-strong)] bg-[color:var(--navi-input-bg)] px-3 py-2.5 font-mono text-sm text-[color:var(--navi-muted)]">
-                  23°58&apos;S  43°10&apos;W
-                </div>
+                <input
+                  id="collection-coordinates"
+                  type="text"
+                  value={coordinates}
+                  onChange={(event) => setCoordinates(event.target.value)}
+                  placeholder="Ex.: 23°58'S 43°10'W"
+                  autoComplete="off"
+                  className={COLLECTION_FIELD_CLASS}
+                />
               </div>
               <div>
-                <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]">
+                <label
+                  htmlFor="collection-datetime"
+                  className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]"
+                >
                   Data e hora da coleta
                 </label>
-                <div className="h-[43px] rounded-md border border-[color:var(--navi-border-strong)] bg-[color:var(--navi-input-bg)]" />
+                <input
+                  id="collection-datetime"
+                  type="datetime-local"
+                  value={collectedAt}
+                  onChange={(event) => setCollectedAt(event.target.value)}
+                  className={COLLECTION_FIELD_CLASS}
+                />
               </div>
               <div>
-                <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]">
+                <label
+                  htmlFor="collection-campaign"
+                  className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]"
+                >
                   Campanha
                 </label>
-                <div className="rounded-md border border-[color:var(--navi-border-strong)] bg-[color:var(--navi-input-bg)] px-3 py-2.5 font-mono text-sm text-[color:var(--navi-text)]">
-                  Levantamento Santos 2026
-                </div>
+                <input
+                  id="collection-campaign"
+                  type="text"
+                  value={campaign}
+                  onChange={(event) => setCampaign(event.target.value)}
+                  placeholder="Nome da campanha"
+                  autoComplete="off"
+                  className={COLLECTION_FIELD_CLASS}
+                />
               </div>
             </div>
           </div>

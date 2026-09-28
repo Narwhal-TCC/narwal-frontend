@@ -112,6 +112,51 @@ describe('ResultadoPage', () => {
     ).toBeInTheDocument()
   })
 
+  it('shows MILCO/NOMBO legend under the sonar image', async () => {
+    vi.mocked(getAnalysis).mockResolvedValue({
+      ...baseAnalysis,
+      image_url: 'https://example.com/sonar.png',
+      detections: [],
+    })
+
+    renderResultado()
+
+    const legend = await screen.findByTestId('detection-class-legend')
+    expect(legend).toHaveTextContent(/Mine-Like Contacts/)
+    expect(legend).toHaveTextContent(/Non-Mine-like Bottom Objects/)
+    expect(legend).toHaveTextContent(/contatos com aparência de mina/)
+  })
+
+  it('highlights overlay box when hovering a detection row', async () => {
+    vi.mocked(getAnalysis).mockResolvedValue({
+      ...baseAnalysis,
+      image_url: 'https://example.com/sonar.png',
+      detections: [
+        { x1: 0, y1: 0, x2: 10, y2: 10, confidence: 0.85, label: 'Alvo A' },
+        { x1: 20, y1: 20, x2: 30, y2: 30, confidence: 0.5, label: 'Alvo B' },
+      ],
+    })
+
+    renderResultado()
+
+    const img = await screen.findByAltText('Imagem de sonar analisada')
+    Object.defineProperty(img, 'naturalWidth', { configurable: true, value: 400 })
+    Object.defineProperty(img, 'naturalHeight', { configurable: true, value: 200 })
+    Object.defineProperty(img, 'clientWidth', { configurable: true, value: 400 })
+    Object.defineProperty(img, 'clientHeight', { configurable: true, value: 200 })
+    fireEvent.load(img)
+
+    await screen.findByTestId('detection-row-1')
+    const boxes = screen.getAllByTestId('detection-box')
+    expect(boxes[1]).toHaveAttribute('data-highlighted', 'false')
+
+    fireEvent.mouseEnter(screen.getByTestId('detection-row-1'))
+    expect(boxes[1]).toHaveAttribute('data-highlighted', 'true')
+
+    fireEvent.mouseLeave(screen.getByTestId('detection-row-1'))
+    expect(boxes[1]).toHaveAttribute('data-highlighted', 'false')
+  })
+
   it('constrains overlay image to max 70vh', async () => {
     vi.mocked(getAnalysis).mockResolvedValue({
       ...baseAnalysis,

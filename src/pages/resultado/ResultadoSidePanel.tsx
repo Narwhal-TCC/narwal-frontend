@@ -5,7 +5,17 @@ import { ResultadoMetricsTab } from './ResultadoMetricsTab'
 
 type ResultadoTab = 'metricas' | 'explicacao'
 
-export function ResultadoSidePanel({ analysis }: { analysis: AnalysisResult }) {
+interface ResultadoSidePanelProps {
+  analysis: AnalysisResult
+  highlightedDetectionIndex?: number | null
+  onHighlightDetection?: (index: number | null) => void
+}
+
+export function ResultadoSidePanel({
+  analysis,
+  highlightedDetectionIndex = null,
+  onHighlightDetection,
+}: ResultadoSidePanelProps) {
   const [activeTab, setActiveTab] = useState<ResultadoTab>('metricas')
 
   return (
@@ -51,7 +61,11 @@ export function ResultadoSidePanel({ analysis }: { analysis: AnalysisResult }) {
         className="overflow-y-auto p-5"
       >
         {activeTab === 'metricas' ? (
-          <ResultadoMetricsTab analysis={analysis} />
+          <ResultadoMetricsTab
+            analysis={analysis}
+            highlightedDetectionIndex={highlightedDetectionIndex}
+            onHighlightDetection={onHighlightDetection}
+          />
         ) : (
           <ResultadoExplainTab />
         )}
