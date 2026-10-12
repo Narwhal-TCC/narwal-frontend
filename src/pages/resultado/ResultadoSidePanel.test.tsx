@@ -14,7 +14,7 @@ const baseAnalysis: AnalysisResult = {
   created_at: '2026-03-15T14:30:00.000Z',
   inference_ms: 120,
   detections: [
-    { x1: 0, y1: 0, x2: 1, y2: 1, confidence: 0.85, label: 'Alvo A' },
+    { x1: 0, y1: 0, x2: 1, y2: 1, confidence: 0.85, label: 'MILCO' },
   ],
 }
 

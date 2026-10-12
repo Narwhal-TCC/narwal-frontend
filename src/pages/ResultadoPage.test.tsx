@@ -43,8 +43,8 @@ describe('ResultadoPage', () => {
       ...baseAnalysis,
       image_url: 'https://example.com/sonar.png',
       detections: [
-        { x1: 0, y1: 0, x2: 10, y2: 10, confidence: 0.85, label: 'Alvo A' },
-        { x1: 1, y1: 1, x2: 2, y2: 2, confidence: 0.5, label: 'Alvo B' },
+        { x1: 0, y1: 0, x2: 10, y2: 10, confidence: 0.85, label: 'MILCO' },
+        { x1: 1, y1: 1, x2: 2, y2: 2, confidence: 0.99, label: 'NOMBO' },
       ],
     })
 
@@ -81,7 +81,7 @@ describe('ResultadoPage', () => {
       ...baseAnalysis,
       image_url: null,
       detections: [
-        { x1: 0, y1: 0, x2: 10, y2: 10, confidence: 0.9, label: 'Alvo' },
+        { x1: 0, y1: 0, x2: 10, y2: 10, confidence: 0.9, label: 'MILCO' },
       ],
     })
 
@@ -132,8 +132,8 @@ describe('ResultadoPage', () => {
       ...baseAnalysis,
       image_url: 'https://example.com/sonar.png',
       detections: [
-        { x1: 0, y1: 0, x2: 10, y2: 10, confidence: 0.85, label: 'Alvo A' },
-        { x1: 20, y1: 20, x2: 30, y2: 30, confidence: 0.5, label: 'Alvo B' },
+        { x1: 0, y1: 0, x2: 10, y2: 10, confidence: 0.85, label: 'MILCO' },
+        { x1: 20, y1: 20, x2: 30, y2: 30, confidence: 0.5, label: 'NOMBO' },
       ],
     })
 

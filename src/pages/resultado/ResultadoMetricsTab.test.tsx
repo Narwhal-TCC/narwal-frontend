@@ -23,9 +23,9 @@ describe('ResultadoMetricsTab', () => {
         analysis={{
           ...baseAnalysis,
           detections: [
-            { x1: 0, y1: 0, x2: 1, y2: 1, confidence: 0.85, label: 'Alvo A' },
-            { x1: 1, y1: 1, x2: 2, y2: 2, confidence: 0.5, label: 'Alvo B' },
-            { x1: 2, y1: 2, x2: 3, y2: 3, confidence: 0.9, label: 'Alvo C' },
+            { x1: 0, y1: 0, x2: 1, y2: 1, confidence: 0.85, label: 'MILCO' },
+            { x1: 1, y1: 1, x2: 2, y2: 2, confidence: 0.5, label: 'NOMBO' },
+            { x1: 2, y1: 2, x2: 3, y2: 3, confidence: 0.9, label: 'MILCO' },
           ],
         }}
       />,
@@ -53,20 +53,18 @@ describe('ResultadoMetricsTab', () => {
         analysis={{
           ...baseAnalysis,
           detections: [
-            { x1: 0, y1: 0, x2: 1, y2: 1, confidence: 0.85, label: 'Alvo A' },
-            { x1: 1, y1: 1, x2: 2, y2: 2, confidence: 0.5, label: 'Alvo B' },
+            { x1: 0, y1: 0, x2: 1, y2: 1, confidence: 0.85, label: 'MILCO' },
+            { x1: 1, y1: 1, x2: 2, y2: 2, confidence: 0.99, label: 'NOMBO' },
           ],
         }}
       />,
     )
 
     expect(screen.getByText('Detecções (2)')).toBeInTheDocument()
-    // Title and badge both use AD-003 heuristic, not API label
-    // (plus Resumo metric card labels → ≥2 each).
     expect(screen.getAllByText('MILCO').length).toBeGreaterThanOrEqual(2)
     expect(screen.getAllByText('NOMBO').length).toBeGreaterThanOrEqual(2)
     expect(screen.getByText(/Confiança 85\.0%/)).toBeInTheDocument()
-    expect(screen.getByText(/Confiança 50\.0%/)).toBeInTheDocument()
+    expect(screen.getByText(/Confiança 99\.0%/)).toBeInTheDocument()
 
     expect(screen.getByTestId('detection-badge-milco')).toHaveClass(
       'text-[color:var(--navi-milco)]',
@@ -90,10 +88,9 @@ describe('ResultadoMetricsTab', () => {
 
     expect(screen.getByText('Detecção (1)')).toBeInTheDocument()
     expect(screen.queryByText('Detecções (1)')).not.toBeInTheDocument()
-    // API label MILCO but confidence < 0.80 → list title + badge are NOMBO
-    expect(screen.getByTestId('detection-badge-nombo')).toBeInTheDocument()
-    expect(screen.queryByTestId('detection-badge-milco')).not.toBeInTheDocument()
-    const listTitle = screen.getByText('NOMBO', {
+    expect(screen.getByTestId('detection-badge-milco')).toBeInTheDocument()
+    expect(screen.queryByTestId('detection-badge-nombo')).not.toBeInTheDocument()
+    const listTitle = screen.getByText('MILCO', {
       selector: 'li p.text-sm',
     })
     expect(listTitle).toBeInTheDocument()

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { DetectionOverlay } from './DetectionOverlay'
 
 const sampleDetections = [
-  { x1: 10, y1: 20, x2: 110, y2: 120, confidence: 0.9, label: 'obj' },
+  { x1: 10, y1: 20, x2: 110, y2: 120, confidence: 0.9, label: 'MILCO' },
 ]
 
 function mockImageMetrics(
@@ -73,8 +73,8 @@ describe('DetectionOverlay', () => {
     render(
       <DetectionOverlay
         detections={[
-          { x1: 0, y1: 0, x2: 50, y2: 50, confidence: 0.5, label: 'a' },
-          { x1: 60, y1: 0, x2: 100, y2: 50, confidence: 0.9, label: 'b' },
+          { x1: 0, y1: 0, x2: 50, y2: 50, confidence: 0.5, label: 'NOMBO' },
+          { x1: 60, y1: 0, x2: 100, y2: 50, confidence: 0.9, label: 'MILCO' },
         ]}
         imageUrl="https://example.com/sonar.png"
         naturalWidth={200}
@@ -95,7 +95,7 @@ describe('DetectionOverlay', () => {
     render(
       <DetectionOverlay
         detections={[
-          { x1: 10, y1: 10, x2: 18, y2: 18, confidence: 0.91, label: 'obj' },
+          { x1: 10, y1: 10, x2: 18, y2: 18, confidence: 0.91, label: 'NOMBO' },
         ]}
         imageUrl="https://example.com/sonar.png"
         naturalWidth={200}
@@ -103,13 +103,13 @@ describe('DetectionOverlay', () => {
       />,
     )
 
-    expect(screen.getByTestId('detection-box-label')).toHaveTextContent('MILCO 91.0%')
+    expect(screen.getByTestId('detection-box-label')).toHaveTextContent('NOMBO 91.0%')
   })
 
   it('letterboxes boxes within painted image bounds under object-contain', () => {
     render(
       <DetectionOverlay
-        detections={[{ x1: 0, y1: 0, x2: 200, y2: 100, confidence: 0.9, label: 'obj' }]}
+        detections={[{ x1: 0, y1: 0, x2: 200, y2: 100, confidence: 0.9, label: 'MILCO' }]}
         imageUrl="https://example.com/sonar.png"
         naturalWidth={400}
         naturalHeight={200}

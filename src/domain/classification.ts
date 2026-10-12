@@ -10,10 +10,8 @@ export interface Detection {
 
 export type DetectionClass = 'MILCO' | 'NOMBO'
 
-const MILCO_THRESHOLD = 0.8
-
 export function classifyDetection(detection: Detection): DetectionClass {
-  return detection.confidence >= MILCO_THRESHOLD ? 'MILCO' : 'NOMBO'
+  return detection.label === 'MILCO' ? 'MILCO' : 'NOMBO'
 }
 
 export function countMilco(detections: Detection[]): number {

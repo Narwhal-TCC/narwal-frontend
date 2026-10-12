@@ -6,7 +6,7 @@ import {
   type AnalysisResult,
   type AnalysisSummary,
 } from '../api/analyses'
-import { analysisHasClass, type DetectionClass } from '../domain/classification'
+import { analysisHasClass, countMilco, type DetectionClass } from '../domain/classification'
 import { shortId } from '../domain/idDisplay'
 import { formatDeteccaoCount } from '../domain/ptPlural'
 
@@ -156,7 +156,7 @@ export function HistoricoPage() {
                   <p>{formatDeteccaoCount(summary.detection_count)}</p>
                   {detail ? (
                     <p className="pt-0.5 text-xs text-[color:var(--navi-muted)]">
-                      {detail.detections.filter((d) => d.confidence >= 0.8).length} MILCO
+                      {countMilco(detail.detections)} MILCO
                     </p>
                   ) : null}
                 </div>

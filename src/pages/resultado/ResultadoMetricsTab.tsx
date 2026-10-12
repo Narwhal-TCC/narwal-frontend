@@ -128,7 +128,6 @@ export function ResultadoMetricsTab({
         ) : (
           <ul className="mt-4 space-y-3">
             {detections.map((detection, index) => {
-              // AD-003: UI class is the confidence heuristic, not API label.
               const detectionClass = classifyDetection(detection)
               return (
                 <li

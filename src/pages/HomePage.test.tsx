@@ -190,7 +190,7 @@ describe('HomePage', () => {
     expect(screen.getByText('1 detecção')).toBeInTheDocument()
   })
 
-  it('shows MILCO badge when heuristic matches and navigates to resultado', async () => {
+  it('shows MILCO badge when a detection is labeled MILCO and navigates to resultado', async () => {
     const now = new Date().toISOString()
     vi.mocked(listAnalyses).mockResolvedValue({
       items: [
@@ -213,7 +213,7 @@ describe('HomePage', () => {
       user_id: 'user-1',
       status: 'succeeded',
       detections: [
-        { x1: 0, y1: 0, x2: 1, y2: 1, confidence: 0.85, label: 'Alvo' },
+        { x1: 0, y1: 0, x2: 1, y2: 1, confidence: 0.85, label: 'MILCO' },
       ],
       image_content_type: 'image/png',
       image_s3_key: 'key',

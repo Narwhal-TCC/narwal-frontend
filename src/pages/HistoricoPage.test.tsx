@@ -60,8 +60,8 @@ describe('HistoricoPage', () => {
       status: 'succeeded',
       detections:
         id === summaryA.id
-          ? [{ x1: 0, y1: 0, x2: 1, y2: 1, confidence: 0.9, label: 'a' }]
-          : [{ x1: 0, y1: 0, x2: 1, y2: 1, confidence: 0.5, label: 'b' }],
+          ? [{ x1: 0, y1: 0, x2: 1, y2: 1, confidence: 0.9, label: 'MILCO' }]
+          : [{ x1: 0, y1: 0, x2: 1, y2: 1, confidence: 0.5, label: 'NOMBO' }],
       image_content_type: 'image/png',
       image_s3_key: 'key',
       image_url: null,
@@ -90,8 +90,8 @@ describe('HistoricoPage', () => {
       status: 'succeeded',
       detections:
         id === summaryA.id
-          ? [{ x1: 0, y1: 0, x2: 1, y2: 1, confidence: 0.9, label: 'a' }]
-          : [{ x1: 0, y1: 0, x2: 1, y2: 1, confidence: 0.5, label: 'b' }],
+          ? [{ x1: 0, y1: 0, x2: 1, y2: 1, confidence: 0.9, label: 'MILCO' }]
+          : [{ x1: 0, y1: 0, x2: 1, y2: 1, confidence: 0.5, label: 'NOMBO' }],
       image_content_type: 'image/png',
       image_s3_key: 'key',
       image_url: null,
@@ -121,8 +121,8 @@ describe('HistoricoPage', () => {
       status: 'succeeded',
       detections:
         id === summaryA.id
-          ? [{ x1: 0, y1: 0, x2: 1, y2: 1, confidence: 0.9, label: 'a' }]
-          : [{ x1: 0, y1: 0, x2: 1, y2: 1, confidence: 0.5, label: 'b' }],
+          ? [{ x1: 0, y1: 0, x2: 1, y2: 1, confidence: 0.9, label: 'MILCO' }]
+          : [{ x1: 0, y1: 0, x2: 1, y2: 1, confidence: 0.5, label: 'NOMBO' }],
       image_content_type: 'image/png',
       image_s3_key: 'key',
       image_url: null,

@@ -6,10 +6,10 @@ export function DetectionClassLegend() {
     >
       <span className="font-semibold text-[color:var(--navi-milco)]">MILCO</span>
       {' — '}
-      contatos com aparência de mina (Mine-Like Contacts).{' '}
+      objetos com aparência de mina (Mine-Like Contacts).{' '}
       <span className="font-semibold text-[color:var(--navi-nombo)]">NOMBO</span>
       {' — '}
-      objetos de fundo não minais (Non-Mine-like Bottom Objects).
+      objetos sem aparência de mina (Non-Mine-like Bottom Objects).
     </p>
   )
 }
