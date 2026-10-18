@@ -19,7 +19,7 @@ export function ResultadoPage() {
   // Create POST may omit image_url; keep loading until GET hydrates it.
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(seeded)
   const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(!seeded?.image_url)
+  const [isLoading, setIsLoading] = useState(!seeded)
   const [highlightedDetectionIndex, setHighlightedDetectionIndex] = useState<
     number | null
   >(null)
@@ -30,9 +30,11 @@ export function ResultadoPage() {
 
   useEffect(() => {
     if (!id) return
-    if (seeded?.image_url) return
 
     let cancelled = false
+    const showLoading = !seeded
+    if (showLoading) setIsLoading(true)
+
     getAnalysis(id)
       .then((result) => {
         if (!cancelled) {
@@ -50,7 +52,7 @@ export function ResultadoPage() {
     return () => {
       cancelled = true
     }
-  }, [id, seeded?.image_url])
+  }, [id, seeded])
 
   if (isLoading && !analysis) {
     return (
