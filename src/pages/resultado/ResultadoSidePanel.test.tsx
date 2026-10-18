@@ -85,11 +85,11 @@ describe('ResultadoSidePanel', () => {
     )
     expect(screen.getByTestId('metric-total')).toHaveTextContent('1')
     expect(
-      screen.queryByText('Nenhuma explicação disponível.'),
+      screen.queryByText('Análise de IA indisponível para esta detecção.'),
     ).not.toBeInTheDocument()
   })
 
-  it('switches to Explicação tab and shows empty state', () => {
+  it('switches to Explicação tab and shows unavailable state without ai_analysis', () => {
     render(<ResultadoSidePanel analysis={baseAnalysis} />)
 
     fireEvent.click(screen.getByRole('tab', { name: 'Explicação' }))
@@ -99,7 +99,7 @@ describe('ResultadoSidePanel', () => {
       'true',
     )
     expect(
-      screen.getByText('Nenhuma explicação disponível.'),
+      screen.getByText('Análise de IA indisponível para esta detecção.'),
     ).toBeInTheDocument()
     expect(screen.queryByTestId('metric-total')).not.toBeInTheDocument()
   })

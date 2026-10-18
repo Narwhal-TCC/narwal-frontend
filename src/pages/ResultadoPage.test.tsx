@@ -96,7 +96,7 @@ describe('ResultadoPage', () => {
     expect(screen.getAllByText('MILCO').length).toBeGreaterThanOrEqual(1)
   })
 
-  it('switches to Explicação tab with empty state', async () => {
+  it('switches to Explicação tab with unavailable ai analysis', async () => {
     vi.mocked(getAnalysis).mockResolvedValue({
       ...baseAnalysis,
       image_url: 'https://example.com/sonar.png',
@@ -108,7 +108,7 @@ describe('ResultadoPage', () => {
     fireEvent.click(await screen.findByRole('tab', { name: 'Explicação' }))
 
     expect(
-      screen.getByText('Nenhuma explicação disponível.'),
+      screen.getByText('Análise de IA indisponível para esta detecção.'),
     ).toBeInTheDocument()
   })
 
