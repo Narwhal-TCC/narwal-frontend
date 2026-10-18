@@ -1,7 +1,19 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { AnalysisResult } from '../../api/analyses'
 import { ResultadoSidePanel } from './ResultadoSidePanel'
+
+vi.mock('../../models/useModels', () => ({
+  useModels: vi.fn(),
+}))
+
+import { useModels } from '../../models/useModels'
+
+const CATALOG_LABELS: Record<string, string> = {
+  'yolo-convnext-balanced': 'YOLO + ConvNeXt (equilibrado)',
+  'yolo-convnext-recall': 'YOLO + ConvNeXt (recall)',
+  'two-stage-pt': 'RetinaNet + fusão (PyTorch)',
+}
 
 const baseAnalysis: AnalysisResult = {
   id: '01234567-89ab-cdef-0123-456789abcdef',
@@ -19,6 +31,40 @@ const baseAnalysis: AnalysisResult = {
 }
 
 describe('ResultadoSidePanel', () => {
+  beforeEach(() => {
+    vi.mocked(useModels).mockReturnValue({
+      models: [],
+      defaultId: null,
+      labelFor: (id) => (id ? (CATALOG_LABELS[id] ?? id) : ''),
+      error: null,
+      isLoading: false,
+    })
+  })
+
+  it('shows catalog label for a known model_id', () => {
+    render(
+      <ResultadoSidePanel
+        analysis={{ ...baseAnalysis, model_id: 'yolo-convnext-recall' }}
+      />,
+    )
+
+    expect(screen.getByTestId('analysis-model-label')).toHaveTextContent(
+      'YOLO + ConvNeXt (recall)',
+    )
+  })
+
+  it('shows raw model_id when id is not in the catalog', () => {
+    render(
+      <ResultadoSidePanel
+        analysis={{ ...baseAnalysis, model_id: 'legacy-unknown-id' }}
+      />,
+    )
+
+    expect(screen.getByTestId('analysis-model-label')).toHaveTextContent(
+      'legacy-unknown-id',
+    )
+  })
+
   it('defaults to Métricas tab and shows metrics content', () => {
     render(<ResultadoSidePanel analysis={baseAnalysis} />)
 

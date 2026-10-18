@@ -9,6 +9,7 @@ import {
 import { analysisHasClass, countMilco, type DetectionClass } from '../domain/classification'
 import { shortId } from '../domain/idDisplay'
 import { formatDeteccaoCount } from '../domain/ptPlural'
+import { useModels } from '../models/useModels'
 
 const PAGE_SIZE = 50
 
@@ -47,6 +48,7 @@ async function enrichSummaries(items: AnalysisSummary[]): Promise<EnrichedItem[]
 
 export function HistoricoPage() {
   const navigate = useNavigate()
+  const { labelFor } = useModels()
   const [items, setItems] = useState<EnrichedItem[]>([])
   const [filter, setFilter] = useState<FilterOption>('ALL')
   const [offset, setOffset] = useState(0)
@@ -137,7 +139,10 @@ export function HistoricoPage() {
         </div>
       ) : (
         <ul className="mt-8 space-y-3">
-          {filteredItems.map(({ summary, detail }) => (
+          {filteredItems.map(({ summary, detail }) => {
+            const modelId = detail?.model_id ?? summary.model_id
+            const modelLabel = modelId ? labelFor(modelId) : null
+            return (
             <li key={summary.id}>
               <button
                 type="button"
@@ -151,6 +156,14 @@ export function HistoricoPage() {
                   <p className="pt-1 text-xs text-[color:var(--navi-muted)]">
                     {formatDate(summary.created_at)}
                   </p>
+                  {modelLabel ? (
+                    <p
+                      data-testid={`history-model-${summary.id}`}
+                      className="pt-1 text-xs text-[color:var(--navi-link)]"
+                    >
+                      {modelLabel}
+                    </p>
+                  ) : null}
                 </div>
                 <div className="text-right text-sm text-[color:var(--navi-link)]">
                   <p>{formatDeteccaoCount(summary.detection_count)}</p>
@@ -162,7 +175,8 @@ export function HistoricoPage() {
                 </div>
               </button>
             </li>
-          ))}
+            )
+          })}
         </ul>
       )}
 

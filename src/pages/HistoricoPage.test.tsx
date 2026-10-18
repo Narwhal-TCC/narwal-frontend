@@ -8,7 +8,18 @@ vi.mock('../api/analyses', () => ({
   getAnalysis: vi.fn(),
 }))
 
+vi.mock('../models/useModels', () => ({
+  useModels: vi.fn(),
+}))
+
 import { getAnalysis, listAnalyses } from '../api/analyses'
+import { useModels } from '../models/useModels'
+
+const CATALOG_LABELS: Record<string, string> = {
+  'yolo-convnext-balanced': 'YOLO + ConvNeXt (equilibrado)',
+  'yolo-convnext-recall': 'YOLO + ConvNeXt (recall)',
+  'two-stage-pt': 'RetinaNet + fusão (PyTorch)',
+}
 
 const summaryA = {
   id: 'aaaaaaaa-1111-1111-1111-111111111111',
@@ -45,6 +56,13 @@ describe('HistoricoPage', () => {
   beforeEach(() => {
     vi.mocked(listAnalyses).mockReset()
     vi.mocked(getAnalysis).mockReset()
+    vi.mocked(useModels).mockReturnValue({
+      models: [],
+      defaultId: null,
+      labelFor: (id) => (id ? (CATALOG_LABELS[id] ?? id) : ''),
+      error: null,
+      isLoading: false,
+    })
   })
 
   it('renders analysis list with short ids', async () => {
@@ -223,6 +241,60 @@ describe('HistoricoPage', () => {
     await waitFor(() => {
       expect(screen.queryByRole('button', { name: 'Carregar mais' })).not.toBeInTheDocument()
     })
+  })
+
+  it('shows catalog label for model_id on each history row', async () => {
+    vi.mocked(listAnalyses).mockResolvedValue({
+      items: [summaryA],
+      limit: 50,
+      offset: 0,
+    })
+    vi.mocked(getAnalysis).mockResolvedValue({
+      id: summaryA.id,
+      org_id: 'org',
+      user_id: 'user',
+      status: 'succeeded',
+      model_id: 'two-stage-pt',
+      detections: [],
+      image_content_type: 'image/png',
+      image_s3_key: 'key',
+      image_url: null,
+      created_at: summaryA.created_at,
+      inference_ms: 100,
+    })
+
+    renderHistorico()
+
+    expect(await screen.findByTestId(`history-model-${summaryA.id}`)).toHaveTextContent(
+      'RetinaNet + fusão (PyTorch)',
+    )
+  })
+
+  it('shows raw model_id when catalog lookup fails for stored id', async () => {
+    vi.mocked(listAnalyses).mockResolvedValue({
+      items: [summaryA],
+      limit: 50,
+      offset: 0,
+    })
+    vi.mocked(getAnalysis).mockResolvedValue({
+      id: summaryA.id,
+      org_id: 'org',
+      user_id: 'user',
+      status: 'succeeded',
+      model_id: 'removed-pipeline',
+      detections: [],
+      image_content_type: 'image/png',
+      image_s3_key: 'key',
+      image_url: null,
+      created_at: summaryA.created_at,
+      inference_ms: 100,
+    })
+
+    renderHistorico()
+
+    expect(await screen.findByTestId(`history-model-${summaryA.id}`)).toHaveTextContent(
+      'removed-pipeline',
+    )
   })
 
   it('navigates to resultado when a row is clicked', async () => {

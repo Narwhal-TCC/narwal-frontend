@@ -18,6 +18,7 @@ export interface AnalysisSummary {
   created_at: string
   inference_ms: number | null
   detection_count: number
+  model_id?: string
 }
 
 export interface AnalysisResult {
@@ -31,6 +32,7 @@ export interface AnalysisResult {
   image_url: string | null
   created_at: string
   inference_ms: number | null
+  model_id?: string
 }
 
 export interface AnalysisListResponse {
