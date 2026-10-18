@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { ApiError } from '../api/client'
 import { FILE_TOO_LARGE_MESSAGE, INVALID_TYPE_MESSAGE } from '../domain/uploadValidation'
 import { NovaAnalisePage } from './NovaAnalisePage'
 
@@ -8,7 +9,43 @@ vi.mock('../api/analyses', () => ({
   createAnalysis: vi.fn(),
 }))
 
+vi.mock('../models/useModels', () => ({
+  useModels: vi.fn(),
+}))
+
 import { createAnalysis } from '../api/analyses'
+import { useModels } from '../models/useModels'
+
+const CATALOG = [
+  {
+    id: 'yolo-convnext-balanced',
+    label: 'YOLO + ConvNeXt (equilibrado)',
+    description: '53 de 75 minas no teste, 11 falsos alarmes',
+    is_default: true,
+  },
+  {
+    id: 'yolo-convnext-recall',
+    label: 'YOLO + ConvNeXt (recall)',
+    description: '58 de 75 minas no teste, 25 falsos alarmes',
+    is_default: false,
+  },
+  {
+    id: 'two-stage-pt',
+    label: 'RetinaNet + fusão (PyTorch)',
+    description: '36 de 75 minas no teste, 7 falsos alarmes',
+    is_default: false,
+  },
+]
+
+function mockCatalogLoaded() {
+  vi.mocked(useModels).mockReturnValue({
+    models: CATALOG,
+    defaultId: 'yolo-convnext-balanced',
+    labelFor: (id) => CATALOG.find((m) => m.id === id)?.label ?? id ?? '',
+    error: null,
+    isLoading: false,
+  })
+}
 
 function renderNova(initialPath = '/analises/nova') {
   return render(
@@ -29,6 +66,7 @@ function createFile(name: string, type: string, sizeBytes: number): File {
 describe('NovaAnalisePage', () => {
   beforeEach(() => {
     vi.mocked(createAnalysis).mockReset()
+    mockCatalogLoaded()
   })
 
   it('rejects a non-image file type', async () => {
@@ -88,5 +126,48 @@ describe('NovaAnalisePage', () => {
     await waitFor(() => {
       expect(screen.getByText('Loading Page')).toBeInTheDocument()
     })
+  })
+
+  it('preselects the default model and shows its description', async () => {
+    renderNova()
+
+    const select = screen.getByLabelText('Pipeline') as HTMLSelectElement
+    await waitFor(() => {
+      expect(select.value).toBe('yolo-convnext-balanced')
+    })
+    expect(screen.getByText('53 de 75 minas no teste, 11 falsos alarmes')).toBeInTheDocument()
+    expect(select).toHaveTextContent('YOLO + ConvNeXt (equilibrado)')
+  })
+
+  it('updates description when another model is selected', async () => {
+    renderNova()
+
+    const select = screen.getByLabelText('Pipeline')
+    await waitFor(() => {
+      expect(select).toHaveValue('yolo-convnext-balanced')
+    })
+
+    fireEvent.change(select, { target: { value: 'yolo-convnext-recall' } })
+
+    expect(screen.getByText('58 de 75 minas no teste, 25 falsos alarmes')).toBeInTheDocument()
+    expect(
+      screen.queryByText('53 de 75 minas no teste, 11 falsos alarmes'),
+    ).not.toBeInTheDocument()
+  })
+
+  it('disables the select with Modelo padrão when catalog fails', async () => {
+    vi.mocked(useModels).mockReturnValue({
+      models: [],
+      defaultId: null,
+      labelFor: (id) => id ?? '',
+      error: new ApiError('UNAUTHORIZED', 'Sessão expirada.', 401),
+      isLoading: false,
+    })
+
+    renderNova()
+
+    const select = screen.getByLabelText('Pipeline') as HTMLSelectElement
+    expect(select).toBeDisabled()
+    expect(select).toHaveDisplayValue('Modelo padrão')
   })
 })

@@ -1,8 +1,9 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { DragEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { icoUploadDrop } from '../assets'
 import { validateUploadFile } from '../domain/uploadValidation'
+import { useModels } from '../models/useModels'
 import { setPendingUploadFile } from '../upload/pendingFile'
 
 const COLLECTION_FIELD_CLASS =
@@ -19,6 +20,17 @@ export function NovaAnalisePage() {
   const [coordinates, setCoordinates] = useState("23°58'S 43°10'W")
   const [collectedAt, setCollectedAt] = useState('2026-03-15T14:30')
   const [campaign, setCampaign] = useState('Levantamento Santos 2026')
+  const { models, defaultId, error: modelsError } = useModels()
+  const [selectedModelId, setSelectedModelId] = useState<string>('')
+
+  useEffect(() => {
+    if (defaultId) {
+      setSelectedModelId(defaultId)
+    }
+  }, [defaultId])
+
+  const catalogFailed = modelsError !== null
+  const selectedModel = models.find((m) => m.id === selectedModelId)
 
   const handleFile = (file: File | null) => {
     if (!file) return
@@ -48,7 +60,12 @@ export function NovaAnalisePage() {
       return
     }
     setPendingUploadFile(selectedFile)
-    navigate('/analises/loading', { state: { file: selectedFile } })
+    navigate('/analises/loading', {
+      state: {
+        file: selectedFile,
+        modelId: catalogFailed ? undefined : selectedModelId || undefined,
+      },
+    })
   }
 
   return (
@@ -98,6 +115,42 @@ export function NovaAnalisePage() {
         </div>
 
         <div className="flex flex-col gap-4">
+          <div className="rounded-[10px] border border-[color:var(--navi-border-subtle)] bg-[color:var(--navi-panel)] p-5">
+            <p className="text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]">
+              Modelo de detecção
+            </p>
+            <div className="mt-4">
+              <label
+                htmlFor="analysis-model"
+                className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]"
+              >
+                Pipeline
+              </label>
+              <select
+                id="analysis-model"
+                disabled={catalogFailed}
+                value={catalogFailed ? '' : selectedModelId}
+                onChange={(event) => setSelectedModelId(event.target.value)}
+                className={COLLECTION_FIELD_CLASS}
+              >
+                {catalogFailed ? (
+                  <option value="">Modelo padrão</option>
+                ) : (
+                  models.map((model) => (
+                    <option key={model.id} value={model.id}>
+                      {model.label}
+                    </option>
+                  ))
+                )}
+              </select>
+              {selectedModel && !catalogFailed ? (
+                <p className="pt-2 text-[13px] text-[color:var(--navi-muted)]">
+                  {selectedModel.description}
+                </p>
+              ) : null}
+            </div>
+          </div>
+
           <div className="rounded-[10px] border border-[color:var(--navi-border-subtle)] bg-[color:var(--navi-panel)] p-5">
             <p className="text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]">
               Dados da coleta
