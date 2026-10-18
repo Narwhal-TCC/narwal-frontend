@@ -79,7 +79,7 @@ export function ResultadoSidePanel({
             onHighlightDetection={onHighlightDetection}
           />
         ) : (
-          <ResultadoExplainTab />
+          <ResultadoExplainTab aiAnalysis={analysis.ai_analysis} />
         )}
       </div>
     </div>

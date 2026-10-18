@@ -1,5 +1,30 @@
 import { apiRequest } from './client'
 
+export type AiStatus = 'ready' | 'unavailable'
+
+export type AiReason =
+  | 'disabled'
+  | 'timeout'
+  | 'provider_error'
+  | 'rate_limited'
+  | 'invalid_response'
+
+export interface AiDetectionNote {
+  index: number
+  note: string
+}
+
+export interface AiAnalysis {
+  status: AiStatus
+  reason: AiReason | null
+  summary: string | null
+  detections: AiDetectionNote[]
+  recommendation: string | null
+  caveats: string[]
+  model: string | null
+  generated_at: string | null
+}
+
 export interface Detection {
   x1: number
   y1: number
@@ -33,6 +58,7 @@ export interface AnalysisResult {
   created_at: string
   inference_ms: number | null
   model_id?: string
+  ai_analysis?: AiAnalysis | null
 }
 
 export interface AnalysisListResponse {

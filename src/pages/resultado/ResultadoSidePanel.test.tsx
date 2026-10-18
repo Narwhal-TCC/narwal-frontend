@@ -1,7 +1,17 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { AnalysisResult } from '../../api/analyses'
+import type { AiAnalysis, AnalysisResult } from '../../api/analyses'
 import { ResultadoSidePanel } from './ResultadoSidePanel'
+
+vi.mock('./ResultadoExplainTab', async (importOriginal) => {
+  const mod = await importOriginal<typeof import('./ResultadoExplainTab')>()
+  return {
+    ...mod,
+    ResultadoExplainTab: vi.fn(mod.ResultadoExplainTab),
+  }
+})
+
+import { ResultadoExplainTab } from './ResultadoExplainTab'
 
 vi.mock('../../models/useModels', () => ({
   useModels: vi.fn(),
@@ -32,6 +42,7 @@ const baseAnalysis: AnalysisResult = {
 
 describe('ResultadoSidePanel', () => {
   beforeEach(() => {
+    vi.mocked(ResultadoExplainTab).mockClear()
     vi.mocked(useModels).mockReturnValue({
       models: [],
       defaultId: null,
@@ -91,6 +102,32 @@ describe('ResultadoSidePanel', () => {
       screen.getByText('Nenhuma explicação disponível.'),
     ).toBeInTheDocument()
     expect(screen.queryByTestId('metric-total')).not.toBeInTheDocument()
+  })
+
+  it('passes ai_analysis to Explicação tab when the tab is opened', () => {
+    const ai_analysis: AiAnalysis = {
+      status: 'unavailable',
+      reason: 'disabled',
+      summary: null,
+      detections: [],
+      recommendation: null,
+      caveats: [],
+      model: null,
+      generated_at: null,
+    }
+
+    render(
+      <ResultadoSidePanel
+        analysis={{ ...baseAnalysis, ai_analysis }}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Explicação' }))
+
+    expect(ResultadoExplainTab).toHaveBeenCalledWith(
+      { aiAnalysis: ai_analysis },
+      undefined,
+    )
   })
 
   it('switches back to Métricas tab', () => {

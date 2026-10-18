@@ -1,4 +1,10 @@
-export function ResultadoExplainTab() {
+import type { AiAnalysis } from '../../api/analyses'
+
+interface ResultadoExplainTabProps {
+  aiAnalysis?: AiAnalysis | null
+}
+
+export function ResultadoExplainTab({ aiAnalysis: _aiAnalysis }: ResultadoExplainTabProps = {}) {
   return (
     <section
       aria-label="Explicação"
