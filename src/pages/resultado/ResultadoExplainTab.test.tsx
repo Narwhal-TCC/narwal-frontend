@@ -46,6 +46,73 @@ describe('ResultadoExplainTab', () => {
     ).toBeInTheDocument()
   })
 
+  it('shows class and confidence in detection headings when analysis detections are passed', () => {
+    render(
+      <ResultadoExplainTab
+        aiAnalysis={readyFixture}
+        detections={[
+          {
+            x1: 0,
+            y1: 0,
+            x2: 10,
+            y2: 10,
+            label: 'MILCO',
+            confidence: 0.9,
+          },
+          {
+            x1: 1,
+            y1: 1,
+            x2: 11,
+            y2: 11,
+            label: 'NOMBO',
+            confidence: 0.5,
+          },
+          {
+            x1: 2,
+            y1: 2,
+            x2: 12,
+            y2: 12,
+            label: 'MILCO',
+            confidence: 0.7,
+          },
+        ]}
+      />,
+    )
+
+    expect(
+      screen.getByText('Detecção 1 · MILCO · 90,0% de confiança'),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText('Detecção 3 · MILCO · 70,0% de confiança'),
+    ).toBeInTheDocument()
+  })
+
+  it('humanizes zero-based detection references in summary text', () => {
+    render(
+      <ResultadoExplainTab
+        aiAnalysis={{
+          ...readyFixture,
+          summary: 'Priorizando a detecção 0 com maior confiança.',
+          detections: [],
+        }}
+        detections={[
+          {
+            x1: 0,
+            y1: 0,
+            x2: 10,
+            y2: 10,
+            label: 'MILCO',
+            confidence: 0.9,
+          },
+        ]}
+      />,
+    )
+
+    expect(
+      screen.getByText('Priorizando a Detecção 1 com maior confiança.'),
+    ).toBeInTheDocument()
+  })
+
   it('shows unavailable message when status is unavailable', () => {
     render(
       <ResultadoExplainTab

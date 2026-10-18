@@ -4,10 +4,16 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { icoUploadDrop } from '../assets'
 import { validateUploadFile } from '../domain/uploadValidation'
 import { useModels } from '../models/useModels'
+import { ModelConfusionMatrix } from '../components/ModelConfusionMatrix'
+import { benchmarkForModel } from '../domain/modelBenchmarks'
 import { setPendingUploadFile } from '../upload/pendingFile'
 
-const COLLECTION_FIELD_CLASS =
-  'w-full rounded-md border border-[color:var(--navi-border-strong)] bg-[color:var(--navi-input-bg)] px-3 py-2.5 font-mono text-sm text-[color:var(--navi-text)] placeholder:text-[color:var(--navi-muted)]'
+const FIELD_CLASS =
+  'w-full rounded-md border border-[color:var(--navi-border-strong)] bg-[color:var(--navi-panel)] px-3 py-2.5 text-sm text-[color:var(--navi-text)] placeholder:text-[color:var(--navi-muted)]'
+
+const COLLECTION_FIELD_CLASS = `${FIELD_CLASS} font-mono`
+
+const SELECT_CLASS = `${FIELD_CLASS} cursor-pointer`
 
 export function NovaAnalisePage() {
   const navigate = useNavigate()
@@ -31,6 +37,9 @@ export function NovaAnalisePage() {
 
   const catalogFailed = modelsError !== null
   const selectedModel = models.find((m) => m.id === selectedModelId)
+  const selectedBenchmark = selectedModelId
+    ? benchmarkForModel(selectedModelId)
+    : null
 
   const handleFile = (file: File | null) => {
     if (!file) return
@@ -131,7 +140,7 @@ export function NovaAnalisePage() {
                 disabled={catalogFailed}
                 value={catalogFailed ? '' : selectedModelId}
                 onChange={(event) => setSelectedModelId(event.target.value)}
-                className={COLLECTION_FIELD_CLASS}
+                className={SELECT_CLASS}
               >
                 {catalogFailed ? (
                   <option value="">Modelo padrão</option>
@@ -144,16 +153,36 @@ export function NovaAnalisePage() {
                 )}
               </select>
               {selectedModel && !catalogFailed ? (
-                <p className="pt-2 text-[13px] text-[color:var(--navi-muted)]">
-                  {selectedModel.description}
-                </p>
+                <div className="pt-3">
+                  <p className="text-[13px] leading-[20px] text-[color:var(--navi-text)]">
+                    {selectedBenchmark?.summary ?? selectedModel.description}
+                  </p>
+                  {selectedBenchmark ? (
+                    <>
+                      <p className="pt-2 text-[13px] leading-[20px] text-[color:var(--navi-muted)]">
+                        {selectedBenchmark.narrative}
+                      </p>
+                      <ModelConfusionMatrix benchmark={selectedBenchmark} />
+                    </>
+                  ) : (
+                    <p className="pt-2 text-[13px] text-[color:var(--navi-muted)]">
+                      {selectedModel.description}
+                    </p>
+                  )}
+                </div>
               ) : null}
             </div>
           </div>
 
-          <div className="rounded-[10px] border border-[color:var(--navi-border-subtle)] bg-[color:var(--navi-panel)] p-5">
-            <p className="text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]">
-              Dados da coleta
+          <details className="rounded-[10px] border border-[color:var(--navi-border-subtle)] bg-[color:var(--navi-panel)] p-5 [&_summary::-webkit-details-marker]:hidden">
+            <summary className="cursor-pointer list-none text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]">
+              Informações adicionais
+              <span className="ml-1.5 font-normal normal-case tracking-normal text-[color:var(--navi-muted)]">
+                (opcional)
+              </span>
+            </summary>
+            <p className="pt-3 text-[12px] leading-[18px] text-[color:var(--navi-muted)]">
+              Coordenadas, data e campanha ainda não são enviadas na análise.
             </p>
             <div className="mt-4 space-y-3.5">
               <div>
@@ -206,7 +235,7 @@ export function NovaAnalisePage() {
                 />
               </div>
             </div>
-          </div>
+          </details>
 
           {error ? (
             <p role="alert" className="text-[13px] text-[color:var(--navi-milco)]">

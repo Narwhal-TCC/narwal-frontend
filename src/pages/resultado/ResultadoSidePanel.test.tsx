@@ -125,7 +125,10 @@ describe('ResultadoSidePanel', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Explicação' }))
 
     expect(ResultadoExplainTab).toHaveBeenCalledWith(
-      { aiAnalysis: ai_analysis },
+      {
+        aiAnalysis: ai_analysis,
+        detections: baseAnalysis.detections,
+      },
       undefined,
     )
   })

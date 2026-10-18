@@ -113,6 +113,8 @@ describe('NovaAnalisePage', () => {
   it('renders editable collection metadata fields', () => {
     renderNova()
 
+    fireEvent.click(screen.getByText('Informações adicionais'))
+
     const coordinates = screen.getByLabelText('Coordenadas')
     const collectedAt = screen.getByLabelText('Data e hora da coleta')
     const campaign = screen.getByLabelText('Campanha')
@@ -150,7 +152,10 @@ describe('NovaAnalisePage', () => {
     await waitFor(() => {
       expect(select.value).toBe('yolo-convnext-balanced')
     })
-    expect(screen.getByText('53 de 75 minas no teste, 11 falsos alarmes')).toBeInTheDocument()
+    expect(
+      screen.getByText('53 de 75 minas encontradas · 11 falsos alarmes'),
+    ).toBeInTheDocument()
+    expect(screen.getByText('Destino dos objetos (teste)')).toBeInTheDocument()
     expect(select).toHaveTextContent('YOLO + ConvNeXt (equilibrado)')
   })
 
@@ -164,9 +169,11 @@ describe('NovaAnalisePage', () => {
 
     fireEvent.change(select, { target: { value: 'yolo-convnext-recall' } })
 
-    expect(screen.getByText('58 de 75 minas no teste, 25 falsos alarmes')).toBeInTheDocument()
     expect(
-      screen.queryByText('53 de 75 minas no teste, 11 falsos alarmes'),
+      screen.getByText('58 de 75 minas encontradas · 25 falsos alarmes'),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByText('53 de 75 minas encontradas · 11 falsos alarmes'),
     ).not.toBeInTheDocument()
   })
 

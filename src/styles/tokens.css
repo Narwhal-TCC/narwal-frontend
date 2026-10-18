@@ -45,3 +45,8 @@ html {
   background-color: var(--navi-bg);
   color: var(--navi-text);
 }
+
+select option {
+  background-color: var(--navi-panel);
+  color: var(--navi-text);
+}

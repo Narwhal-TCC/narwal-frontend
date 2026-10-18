@@ -1,5 +1,10 @@
 import type { ReactNode } from 'react'
 import type { AiAnalysis } from '../../api/analyses'
+import type { Detection } from '../../domain/classification'
+import {
+  formatDetectionHeading,
+  humanizeAiDetectionText,
+} from '../../domain/detectionDisplay'
 
 const UNAVAILABLE_MESSAGE =
   'Análise de IA indisponível para esta detecção.'
@@ -8,6 +13,7 @@ const DISCLAIMER =
 
 interface ResultadoExplainTabProps {
   aiAnalysis?: AiAnalysis | null
+  detections?: Detection[]
 }
 
 function ExplainSection({
@@ -29,10 +35,20 @@ function ExplainSection({
   )
 }
 
+function humanizeOptional(
+  text: string | null | undefined,
+  detectionCount: number,
+): string | null {
+  if (!text) return null
+  return humanizeAiDetectionText(text, detectionCount)
+}
+
 export function ResultadoExplainTab({
   aiAnalysis,
+  detections = [],
 }: ResultadoExplainTabProps = {}) {
   const isReady = aiAnalysis?.status === 'ready'
+  const detectionCount = detections.length
 
   return (
     <section aria-label="Explicação" className="flex flex-col gap-5">
@@ -50,27 +66,34 @@ export function ResultadoExplainTab({
       ) : (
         <>
           {aiAnalysis.summary ? (
-            <ExplainSection title="Resumo">{aiAnalysis.summary}</ExplainSection>
+            <ExplainSection title="Resumo">
+              {humanizeOptional(aiAnalysis.summary, detectionCount)}
+            </ExplainSection>
           ) : null}
 
           {aiAnalysis.detections.length > 0 ? (
             <ExplainSection title="Detecções">
               <ul className="flex list-none flex-col gap-3 p-0">
-                {aiAnalysis.detections.map((detection) => (
-                  <li key={detection.index}>
-                    <p className="text-[11px] font-medium text-[color:var(--navi-muted)]">
-                      Detecção {detection.index + 1}
-                    </p>
-                    <p className="pt-1">{detection.note}</p>
-                  </li>
-                ))}
+                {aiAnalysis.detections.map((detectionNote) => {
+                  const source = detections[detectionNote.index]
+                  return (
+                    <li key={detectionNote.index}>
+                      <p className="text-[11px] font-medium text-[color:var(--navi-muted)]">
+                        {formatDetectionHeading(detectionNote.index, source)}
+                      </p>
+                      <p className="pt-1">
+                        {humanizeOptional(detectionNote.note, detectionCount)}
+                      </p>
+                    </li>
+                  )
+                })}
               </ul>
             </ExplainSection>
           ) : null}
 
           {aiAnalysis.recommendation ? (
             <ExplainSection title="Recomendação">
-              {aiAnalysis.recommendation}
+              {humanizeOptional(aiAnalysis.recommendation, detectionCount)}
             </ExplainSection>
           ) : null}
 
@@ -78,7 +101,9 @@ export function ResultadoExplainTab({
             <ExplainSection title="Limitações">
               <ul className="list-disc pl-5">
                 {aiAnalysis.caveats.map((caveat) => (
-                  <li key={caveat}>{caveat}</li>
+                  <li key={caveat}>
+                    {humanizeOptional(caveat, detectionCount)}
+                  </li>
                 ))}
               </ul>
             </ExplainSection>
