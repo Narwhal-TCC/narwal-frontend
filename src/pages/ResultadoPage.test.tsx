@@ -124,7 +124,7 @@ describe('ResultadoPage', () => {
     const legend = await screen.findByTestId('detection-class-legend')
     expect(legend).toHaveTextContent(/Mine-Like Contacts/)
     expect(legend).toHaveTextContent(/Non-Mine-like Bottom Objects/)
-    expect(legend).toHaveTextContent(/contatos com aparência de mina/)
+    expect(legend).toHaveTextContent(/objetos com aparência de mina/)
   })
 
   it('highlights overlay box when hovering a detection row', async () => {

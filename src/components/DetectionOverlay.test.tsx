@@ -88,7 +88,7 @@ describe('DetectionOverlay', () => {
     expect(boxes[1]).toHaveAttribute('data-highlighted', 'true')
     expect(
       boxes[1].querySelector('[data-testid="detection-box-frame"]'),
-    ).toHaveStyle({ borderWidth: '5px' })
+    ).toHaveStyle({ borderWidth: '3px' })
   })
 
   it('shows full label text on a narrow detection box', () => {

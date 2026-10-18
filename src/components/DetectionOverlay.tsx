@@ -70,7 +70,7 @@ function frameStyle(
     height: '100%',
     borderStyle: 'solid',
     borderColor: color,
-    borderWidth: '3px',
+    borderWidth: isHighlighted ? '3px' : '2px',
     backgroundColor: 'transparent',
     boxSizing: 'border-box',
   }
