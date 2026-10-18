@@ -10,6 +10,7 @@ import {
 
 interface LoadingLocationState {
   file?: File
+  modelId?: string
 }
 
 export function LoadingPage() {
@@ -20,6 +21,7 @@ export function LoadingPage() {
   useEffect(() => {
     const state = location.state as LoadingLocationState | null
     const file = state?.file ?? getPendingUploadFile()
+    const modelId = state?.modelId
 
     if (!file) {
       navigate('/analises/nova', { replace: true })
@@ -29,7 +31,7 @@ export function LoadingPage() {
     let cancelled = false
 
     // Shared promise across Strict Mode remount so POST /analyses runs once.
-    createAnalysisOnce(file, createAnalysis)
+    createAnalysisOnce(file, createAnalysis, modelId)
       .then((result) => {
         if (cancelled) return
         clearPendingUploadFile()

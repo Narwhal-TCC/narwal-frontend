@@ -54,9 +54,15 @@ export async function getAnalysis(id: string): Promise<AnalysisResult> {
   return apiRequest<AnalysisResult>(`/api/analyses/${id}`)
 }
 
-export async function createAnalysis(file: File): Promise<AnalysisResult> {
+export async function createAnalysis(
+  file: File,
+  modelId?: string,
+): Promise<AnalysisResult> {
   const formData = new FormData()
   formData.append('file', file)
+  if (modelId !== undefined) {
+    formData.append('model_id', modelId)
+  }
   return apiRequest<AnalysisResult>('/api/analyses', {
     method: 'POST',
     body: formData,

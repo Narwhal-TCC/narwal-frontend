@@ -60,7 +60,35 @@ describe('LoadingPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Result Page')).toBeInTheDocument()
     })
-    expect(createAnalysis).toHaveBeenCalledWith(file)
+    expect(createAnalysis).toHaveBeenCalledWith(file, undefined)
+  })
+
+  it('forwards modelId from navigation state to createAnalysis', async () => {
+    vi.mocked(createAnalysis).mockResolvedValue({
+      id: 'analysis-recall',
+      org_id: 'org',
+      user_id: 'user',
+      status: 'succeeded',
+      detections: [],
+      image_content_type: 'image/png',
+      image_s3_key: 'key',
+      image_url: null,
+      created_at: new Date().toISOString(),
+      inference_ms: 100,
+    })
+
+    const file = createFile()
+    renderLoading([
+      {
+        pathname: '/analises/loading',
+        state: { file, modelId: 'yolo-convnext-recall' },
+      },
+    ])
+
+    await waitFor(() => {
+      expect(screen.getByText('Result Page')).toBeInTheDocument()
+    })
+    expect(createAnalysis).toHaveBeenCalledWith(file, 'yolo-convnext-recall')
   })
 
   it('posts createAnalysis only once under React Strict Mode remount', async () => {

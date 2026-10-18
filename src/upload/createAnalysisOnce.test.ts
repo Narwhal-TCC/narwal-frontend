@@ -20,4 +20,19 @@ describe('createAnalysisOnce', () => {
     await expect(p1).resolves.toEqual({ id: '1' })
     expect(create).toHaveBeenCalledTimes(1)
   })
+
+  it('starts a new upload when the same file uses a different modelId', async () => {
+    const file = new File([new Uint8Array([1])], 'a.png', { type: 'image/png' })
+    const create = vi
+      .fn()
+      .mockResolvedValueOnce({ id: 'balanced' })
+      .mockResolvedValueOnce({ id: 'recall' })
+
+    await createAnalysisOnce(file, create, 'yolo-convnext-balanced')
+    await createAnalysisOnce(file, create, 'yolo-convnext-recall')
+
+    expect(create).toHaveBeenCalledTimes(2)
+    expect(create).toHaveBeenNthCalledWith(1, file, 'yolo-convnext-balanced')
+    expect(create).toHaveBeenNthCalledWith(2, file, 'yolo-convnext-recall')
+  })
 })
