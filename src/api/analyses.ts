@@ -44,6 +44,9 @@ export interface AnalysisSummary {
   inference_ms: number | null
   detection_count: number
   model_id?: string
+  campaign_name?: string | null
+  coordinates?: string | null
+  collected_at?: string | null
 }
 
 export interface AnalysisResult {
@@ -58,6 +61,9 @@ export interface AnalysisResult {
   created_at: string
   inference_ms: number | null
   model_id?: string
+  campaign_name?: string | null
+  coordinates?: string | null
+  collected_at?: string | null
   ai_analysis?: AiAnalysis | null
 }
 

@@ -3,8 +3,6 @@ import { classifyDetection, countMilco } from '../../domain/classification'
 import { shortId } from '../../domain/idDisplay'
 import { DetectionBadge } from './DetectionBadge'
 
-const ACTIVE_CAMPAIGN = 'Santos 2026'
-
 function formatAnalysisDate(iso: string): string {
   return new Intl.DateTimeFormat('pt-BR', {
     day: '2-digit',
@@ -107,10 +105,14 @@ export function ResultadoMetricsTab({
               {formatAnalysisDate(analysis.created_at)}
             </dd>
           </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-[color:var(--navi-muted)]">Campanha</dt>
-            <dd className="text-[color:var(--navi-text)]">{ACTIVE_CAMPAIGN}</dd>
-          </div>
+          {analysis.campaign_name ? (
+            <div className="flex justify-between gap-4">
+              <dt className="text-[color:var(--navi-muted)]">Campanha</dt>
+              <dd className="text-right text-[color:var(--navi-text)]">
+                {analysis.campaign_name}
+              </dd>
+            </div>
+          ) : null}
         </dl>
       </div>
 

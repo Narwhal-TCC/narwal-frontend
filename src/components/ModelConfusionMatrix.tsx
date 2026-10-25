@@ -36,10 +36,10 @@ export function ModelConfusionMatrix({ benchmark }: ModelConfusionMatrixProps) {
   return (
     <div className="pt-3">
       <p className="text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]">
-        Destino dos objetos (teste)
+        Detalhe na avaliação de referência
       </p>
       <p className="pt-1 text-[11px] leading-[16px] text-[color:var(--navi-muted)]">
-        Linhas = rótulo real · Colunas = o que o pipeline previu
+        Linhas = alvo real · Colunas = o que o modelo indicou
       </p>
       <div className="mt-2 overflow-x-auto rounded-md border border-[color:var(--navi-border-subtle)] bg-[color:var(--navi-input-bg)]">
         <table className="w-full min-w-[280px] border-collapse text-[11px]">

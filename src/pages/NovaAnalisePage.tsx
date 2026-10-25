@@ -23,9 +23,9 @@ export function NovaAnalisePage() {
   const [error, setError] = useState<string | null>(
     (location.state as { error?: string } | null)?.error ?? null,
   )
-  const [coordinates, setCoordinates] = useState("23°58'S 43°10'W")
-  const [collectedAt, setCollectedAt] = useState('2026-03-15T14:30')
-  const [campaign, setCampaign] = useState('Levantamento Santos 2026')
+  const [coordinates, setCoordinates] = useState('')
+  const [collectedAt, setCollectedAt] = useState('')
+  const [campaign, setCampaign] = useState('')
   const { models, defaultId, error: modelsError } = useModels()
   const [selectedModelId, setSelectedModelId] = useState<string>('')
 
@@ -133,7 +133,7 @@ export function NovaAnalisePage() {
                 htmlFor="analysis-model"
                 className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]"
               >
-                Pipeline
+                Modelo
               </label>
               <select
                 id="analysis-model"
@@ -165,7 +165,7 @@ export function NovaAnalisePage() {
                       <ModelConfusionMatrix benchmark={selectedBenchmark} />
                     </>
                   ) : (
-                    <p className="pt-2 text-[13px] text-[color:var(--navi-muted)]">
+                    <p className="pt-2 text-[13px] leading-[20px] text-[color:var(--navi-muted)]">
                       {selectedModel.description}
                     </p>
                   )}

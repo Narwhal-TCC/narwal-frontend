@@ -23,19 +23,29 @@ const CATALOG = [
   {
     id: 'yolo-convnext-balanced',
     label: 'YOLO + ConvNeXt (equilibrado)',
-    description: '53 de 75 minas no teste, 11 falsos alarmes',
+    description:
+      'Recomendado no dia a dia: equilibra achar minas e limitar falsos alarmes.',
     is_default: true,
   },
   {
     id: 'yolo-convnext-recall',
     label: 'YOLO + ConvNeXt (recall)',
-    description: '58 de 75 minas no teste, 25 falsos alarmes',
+    description:
+      'Prioriza não deixar minas passarem; tende a gerar mais pontos para revisar.',
     is_default: false,
   },
   {
     id: 'two-stage-pt',
     label: 'RetinaNet + fusão (PyTorch)',
-    description: '36 de 75 minas no teste, 7 falsos alarmes',
+    description:
+      'Versão anterior: menos falsos alarmes, porém localiza menos minas. Indicado para comparar com análises antigas.',
+    is_default: false,
+  },
+  {
+    id: 'yolo-fusion-v3',
+    label: 'YOLO A + fusão ConvNeXt/EdgeNeXt (v3)',
+    description:
+      'Variação mais nova do detector: localiza mais minas que o legado, com mais falsos alarmes que o equilibrado.',
     is_default: false,
   },
 ]
@@ -119,9 +129,10 @@ describe('NovaAnalisePage', () => {
     const collectedAt = screen.getByLabelText('Data e hora da coleta')
     const campaign = screen.getByLabelText('Campanha')
 
-    expect(coordinates).toHaveValue("23°58'S 43°10'W")
+    expect(coordinates).toHaveValue('')
     expect(collectedAt).toHaveAttribute('type', 'datetime-local')
-    expect(campaign).toHaveValue('Levantamento Santos 2026')
+    expect(collectedAt).toHaveValue('')
+    expect(campaign).toHaveValue('')
 
     fireEvent.change(coordinates, { target: { value: "24°00'S 44°00'W" } })
     fireEvent.change(campaign, { target: { value: 'Campanha teste' } })
@@ -148,21 +159,21 @@ describe('NovaAnalisePage', () => {
   it('preselects the default model and shows its description', async () => {
     renderNova()
 
-    const select = screen.getByLabelText('Pipeline') as HTMLSelectElement
+    const select = screen.getByLabelText('Modelo') as HTMLSelectElement
     await waitFor(() => {
       expect(select.value).toBe('yolo-convnext-balanced')
     })
     expect(
-      screen.getByText('53 de 75 minas encontradas · 11 falsos alarmes'),
+      screen.getByText('53 de 75 minas localizadas · 11 falsos alarmes'),
     ).toBeInTheDocument()
-    expect(screen.getByText('Destino dos objetos (teste)')).toBeInTheDocument()
+    expect(screen.getByText('Detalhe na avaliação de referência')).toBeInTheDocument()
     expect(select).toHaveTextContent('YOLO + ConvNeXt (equilibrado)')
   })
 
   it('updates description when another model is selected', async () => {
     renderNova()
 
-    const select = screen.getByLabelText('Pipeline')
+    const select = screen.getByLabelText('Modelo')
     await waitFor(() => {
       expect(select).toHaveValue('yolo-convnext-balanced')
     })
@@ -170,11 +181,27 @@ describe('NovaAnalisePage', () => {
     fireEvent.change(select, { target: { value: 'yolo-convnext-recall' } })
 
     expect(
-      screen.getByText('58 de 75 minas encontradas · 25 falsos alarmes'),
+      screen.getByText('58 de 75 minas localizadas · 25 falsos alarmes'),
     ).toBeInTheDocument()
     expect(
-      screen.queryByText('53 de 75 minas encontradas · 11 falsos alarmes'),
+      screen.queryByText('53 de 75 minas localizadas · 11 falsos alarmes'),
     ).not.toBeInTheDocument()
+  })
+
+  it('shows fusion v3 benchmark and confusion matrix when selected', async () => {
+    renderNova()
+
+    const select = screen.getByLabelText('Modelo')
+    await waitFor(() => {
+      expect(select).toHaveValue('yolo-convnext-balanced')
+    })
+
+    fireEvent.change(select, { target: { value: 'yolo-fusion-v3' } })
+
+    expect(
+      screen.getByText('50 de 75 minas localizadas · 21 falsos alarmes'),
+    ).toBeInTheDocument()
+    expect(screen.getByText('Detalhe na avaliação de referência')).toBeInTheDocument()
   })
 
   it('disables the select with Modelo padrão when catalog fails', async () => {
@@ -188,7 +215,7 @@ describe('NovaAnalisePage', () => {
 
     renderNova()
 
-    const select = screen.getByLabelText('Pipeline') as HTMLSelectElement
+    const select = screen.getByLabelText('Modelo') as HTMLSelectElement
     expect(select).toBeDisabled()
     expect(select).toHaveDisplayValue('Modelo padrão')
   })

@@ -36,6 +36,23 @@ describe('ResultadoMetricsTab', () => {
     expect(screen.getByTestId('metric-nombo')).toHaveTextContent('1')
   })
 
+  it('does not show campaign row when campaign_name is absent', () => {
+    render(<ResultadoMetricsTab analysis={baseAnalysis} />)
+
+    expect(screen.queryByText('Campanha')).not.toBeInTheDocument()
+  })
+
+  it('shows campaign from analysis when provided', () => {
+    render(
+      <ResultadoMetricsTab
+        analysis={{ ...baseAnalysis, campaign_name: 'Campanha teste' }}
+      />,
+    )
+
+    expect(screen.getByText('Campanha')).toBeInTheDocument()
+    expect(screen.getByText('Campanha teste')).toBeInTheDocument()
+  })
+
   it('shows empty detections treatment with zero counts', () => {
     render(<ResultadoMetricsTab analysis={baseAnalysis} />)
 
