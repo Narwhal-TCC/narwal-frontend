@@ -1,0 +1,75 @@
+name: Deploy frontend (AWS)
+
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - "src/**"
+      - "public/**"
+      - "index.html"
+      - "package.json"
+      - "package-lock.json"
+      - "vite.config.ts"
+      - "tsconfig*.json"
+      - ".github/workflows/deploy-aws.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+jobs:
+  test-build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Production build
+        run: npm run build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Sync static assets to S3
+        env:
+          UI_BUCKET: ${{ vars.UI_S3_BUCKET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${UI_BUCKET}" ]; then
+            echo "Repository variable UI_S3_BUCKET is required (Terraform output ui_bucket_name)."
+            exit 1
+          fi
+          aws s3 sync dist/ "s3://${UI_BUCKET}/" --delete
+
+      - name: Invalidate CloudFront cache
+        env:
+          DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${DISTRIBUTION_ID}" ]; then
+            echo "Repository variable CLOUDFRONT_DISTRIBUTION_ID is required (Terraform output cloudfront_distribution_id)."
+            exit 1
+          fi
+          aws cloudfront create-invalidation \
+            --distribution-id "${DISTRIBUTION_ID}" \
+            --paths "/index.html" "/assets/*"
