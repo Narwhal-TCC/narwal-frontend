@@ -216,7 +216,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${EC2_SSH_PRIVATE_KEY}" ]; then
-            echo "Repository secret EC2_SSH_PRIVATE_KEY is required (PEM from terraform infra/keys/*-api.pem)." >&2
+            echo "Repository secret EC2_SSH_PRIVATE_KEY is required (narwhal-dev-keypair.pem)." >&2
             exit 1
           fi
           bash narwal-backend/scripts/aws/deploy-ui-via-ssh.sh
