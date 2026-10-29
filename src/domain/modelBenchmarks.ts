@@ -66,3 +66,27 @@ export const MODEL_BENCHMARKS: Record<string, ModelBenchmark> = {
 export function benchmarkForModel(modelId: string): ModelBenchmark | null {
   return MODEL_BENCHMARKS[modelId] ?? null
 }
+
+/**
+ * Métricas só do classificador em recortes reais (sem perdas do detector).
+ * Não são comparáveis com MODEL_BENCHMARKS.
+ */
+export interface ClassifierBenchmark {
+  summary: string
+  narrative: string
+}
+
+export const CLASSIFIER_BENCHMARKS: Record<string, ClassifierBenchmark> = {
+  'yolo-fusion-mobilevit': {
+    summary:
+      'Classificador: 72 de 75 MILCO e 25 de 34 NOMBO corretos nos recortes de teste',
+    narrative:
+      'Usa o mesmo detector da v3. Ainda sem avaliação de referência completa: estes números medem só a classificação dos recortes e não contam minas que o detector deixa passar.',
+  },
+}
+
+export function classifierBenchmarkForModel(
+  modelId: string,
+): ClassifierBenchmark | null {
+  return CLASSIFIER_BENCHMARKS[modelId] ?? null
+}

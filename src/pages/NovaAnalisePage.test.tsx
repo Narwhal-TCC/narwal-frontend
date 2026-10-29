@@ -48,6 +48,13 @@ const CATALOG = [
       'Variação mais nova do detector: localiza mais minas que o legado, com mais falsos alarmes que o equilibrado.',
     is_default: false,
   },
+  {
+    id: 'yolo-fusion-mobilevit',
+    label: 'YOLO A + fusão ConvNeXt/MobileViTv2',
+    description:
+      'Mesmo detector da v3, com classificador ConvNeXt + MobileViTv2 nos recortes.',
+    is_default: false,
+  },
 ]
 
 function mockCatalogLoaded() {
@@ -202,6 +209,26 @@ describe('NovaAnalisePage', () => {
       screen.getByText('50 de 75 minas localizadas · 21 falsos alarmes'),
     ).toBeInTheDocument()
     expect(screen.getByText('Detalhe na avaliação de referência')).toBeInTheDocument()
+  })
+
+  it('shows classifier-only summary without confusion matrix for mobilevit fusion', async () => {
+    renderNova()
+
+    const select = screen.getByLabelText('Modelo')
+    await waitFor(() => {
+      expect(select).toHaveValue('yolo-convnext-balanced')
+    })
+
+    fireEvent.change(select, { target: { value: 'yolo-fusion-mobilevit' } })
+
+    expect(
+      screen.getByText(
+        'Classificador: 72 de 75 MILCO e 25 de 34 NOMBO corretos nos recortes de teste',
+      ),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByText('Detalhe na avaliação de referência'),
+    ).not.toBeInTheDocument()
   })
 
   it('disables the select with Modelo padrão when catalog fails', async () => {
