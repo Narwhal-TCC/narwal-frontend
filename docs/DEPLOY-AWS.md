@@ -1,60 +1,42 @@
 # Frontend deploy (AWS Academy Learner Lab)
 
-This repo ships the **React/Vite** UI to the **S3 UI bucket** behind **CloudFront**, using the workflow at [`.github/workflows/deploy-aws.yml`](../.github/workflows/deploy-aws.yml).
+This repo deploys the **React/Vite** UI to the **EC2 edge** (Nginx on port 80) via [`.github/workflows/deploy-aws.yml`](../.github/workflows/deploy-aws.yml).
 
-Infrastructure, API deploy, and the full stack diagram live in the backend repo:
+Infrastructure and API deploy live in the backend repo:
 
 | Topic | Location |
 | ----- | -------- |
-| AWS doc index | [`narwal-backend/docs/aws/README.md`](https://github.com/narwal-tcc/narwal-backend/blob/master/docs/aws/README.md) (or sibling clone: `../narwal-backend/docs/aws/README.md`) |
+| AWS doc index | [`narwal-backend/docs/aws/README.md`](https://github.com/narwal-tcc/narwal-backend/blob/master/docs/aws/README.md) |
 | Architecture | [`../narwal-backend/docs/aws/architecture.md`](../narwal-backend/docs/aws/architecture.md) |
 | Learner Lab ops | [`../narwal-backend/docs/aws/learner-lab-operations.md`](../narwal-backend/docs/aws/learner-lab-operations.md) |
-| Terraform outputs | [`../narwal-backend/infra/README.md`](../narwal-backend/infra/README.md) |
+
+## How deploy works (two steps)
+
+1. **GitHub Actions uploads** the production build to **`s3://<APP_S3_BUCKET>/ui/`** (staging prefix in the **app** bucket — same bucket as models, different prefix).
+2. **SSM runs on the EC2 instance** and executes `aws s3 sync s3://<bucket>/ui/ /var/www/narwal/`, then reloads Nginx.
+
+You do not need a separate UI bucket or CloudFront invalidation.
 
 ## Production routing (no Vite proxy)
 
-Local dev uses the Vite dev-server proxy in [`vite.config.ts`](../vite.config.ts) (`/api` → `localhost:8080` with path rewrite).
+Local dev uses the Vite proxy in [`vite.config.ts`](../vite.config.ts) (`/api` → `localhost:8080`).
 
-In AWS, the **browser origin is CloudFront**. The app must keep calling **relative** paths such as `/api/auth/login` and `/api/analyses`. CloudFront forwards `/api/*` to the EC2 API origin; the default behavior serves this UI from S3. **Do not** point production builds at `localhost` or rely on the dev proxy.
+In AWS, the **browser origin is the Elastic IP** (`http://<eip>/`). Keep **relative** API paths (`/api/auth/login`, `/api/analyses`). Nginx on EC2 proxies `/api/*` to FastAPI. **Do not** point production builds at `localhost`.
 
-## GitHub Actions setup
+## GitHub Actions setup (narwal-frontend)
 
-Configure **repository secrets** and **variables** on **narwal-frontend** (same Learner Lab session keys as the backend repo):
+Organization secrets on **Narwhal-TCC** (same as backend): `AWS_*`, `APP_BUCKET_NAME`, optional `STATE_BUCKET_NAME`. Details: [github-org-secrets.md](https://github.com/Narwhal-TCC/narwal-backend/blob/master/docs/aws/github-org-secrets.md).
 
-### Secrets
+**`deploy-aws.yml`** runs Terraform (`narwal-backend/infra`) then `npm test`, build, S3 sync, and SSM. **`ci.yml`** runs unit tests on PR/push without AWS.
 
-| Name | Purpose |
-| ---- | ------- |
-| `AWS_ACCESS_KEY_ID` | Learner Lab access key |
-| `AWS_SECRET_ACCESS_KEY` | Learner Lab secret key |
-| `AWS_SESSION_TOKEN` | Required when the lab issues temporary session credentials |
-
-Secrets are passed only to `aws-actions/configure-aws-credentials`; the workflow does **not** echo them in logs.
-
-### Variables
-
-| Name | Terraform output | Purpose |
-| ---- | ---------------- | ------- |
-| `AWS_REGION` | (default `us-east-1`) | Region for S3 and CloudFront API calls |
-| `UI_S3_BUCKET` | `ui_bucket_name` | Target bucket for `aws s3 sync dist/` |
-| `CLOUDFRONT_DISTRIBUTION_ID` | `cloudfront_distribution_id` | Cache invalidation after deploy |
-
-Optional but recommended on the backend repo for coordinated smoke checks: `CLOUDFRONT_URL` (`cloudfront_domain_name`).
-
-## What the workflow does
-
-On push to `master` / `main` (frontend paths) or **workflow_dispatch**:
-
-1. `npm ci` → `npm test` → `npm run build` (output in `dist/`).
-2. `aws s3 sync dist/ s3://$UI_S3_BUCKET/` with `--delete`.
-3. CloudFront invalidation for `/index.html` and `/assets/*`.
+Optional repo variable: `AWS_REGION` (`us-east-1`). Legacy repo variables (`APP_S3_BUCKET`, `EC2_INSTANCE_ID`) are not required when using the deploy pipeline.
 
 ## Manual verification
 
-1. Start Lab and ensure the API EC2 instance is running (backend deploy or manual bootstrap).
-2. Open `https://<cloudfront_domain_name>/` from Terraform output.
-3. Log in with seeded demo credentials and run one analysis (see backend [`validation-checklist.md`](https://github.com/narwal-tcc/narwal-backend/blob/master/docs/aws/validation-checklist.md) when available).
+1. Start Lab; ensure EC2 is running and API container is up.
+2. Open `terraform output -raw app_public_url` from backend `infra/`.
+3. Log in with demo credentials and run one analysis (backend [validation-checklist.md](https://github.com/narwal-tcc/narwal-backend/blob/master/docs/aws/validation-checklist.md)).
 
 ## Related backend workflow
 
-API image push, SSM restart, and post-deploy `/api/health` check: [`narwal-backend/.github/workflows/deploy-aws.yml`](../narwal-backend/.github/workflows/deploy-aws.yml).
+API image push, SSM restart, and `/api/health` check: [`narwal-backend/.github/workflows/deploy-aws.yml`](../narwal-backend/.github/workflows/deploy-aws.yml).
