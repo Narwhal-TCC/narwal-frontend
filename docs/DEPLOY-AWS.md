@@ -13,7 +13,7 @@ Infrastructure and API deploy live in the backend repo:
 ## How deploy works (two steps)
 
 1. **GitHub Actions uploads** the production build to **`s3://<APP_S3_BUCKET>/ui/`** (staging prefix in the **app** bucket — same bucket as models, different prefix).
-2. **SSM runs on the EC2 instance** and executes `aws s3 sync s3://<bucket>/ui/ /var/www/narwal/`, then reloads Nginx.
+2. **SSH to EC2** runs `aws s3 sync s3://<bucket>/ui/ /var/www/narwal/` on the instance, then reloads Nginx (Learner Lab — no SSM).
 
 You do not need a separate UI bucket or CloudFront invalidation.
 
@@ -27,7 +27,7 @@ In AWS, the **browser origin is the Elastic IP** (`http://<eip>/`). Keep **relat
 
 Organization secrets on **Narwhal-TCC** (same as backend): `AWS_*`, `APP_BUCKET_NAME`, optional `STATE_BUCKET_NAME`. Details: [github-org-secrets.md](https://github.com/Narwhal-TCC/narwal-backend/blob/master/docs/aws/github-org-secrets.md).
 
-**`deploy-aws.yml`** runs Terraform (`narwal-backend/infra`) then `npm test`, build, S3 sync, and SSM. **`ci.yml`** runs unit tests on PR/push without AWS.
+**`deploy-aws.yml`** runs Terraform (`narwal-backend/infra`) then `npm test`, build, S3 sync, and SSH UI sync. **`ci.yml`** runs unit tests on PR/push without AWS. Requires repo secret **`EC2_SSH_PRIVATE_KEY`** (see backend [github-org-secrets.md](https://github.com/Narwhal-TCC/narwal-backend/blob/master/docs/aws/github-org-secrets.md)).
 
 Optional repo variable: `AWS_REGION` (`us-east-1`). Legacy repo variables (`APP_S3_BUCKET`, `EC2_INSTANCE_ID`) are not required when using the deploy pipeline.
 
@@ -39,4 +39,4 @@ Optional repo variable: `AWS_REGION` (`us-east-1`). Legacy repo variables (`APP_
 
 ## Related backend workflow
 
-API image push, SSM restart, and `/api/health` check: [`narwal-backend/.github/workflows/deploy-aws.yml`](../narwal-backend/.github/workflows/deploy-aws.yml).
+API image push, SSH restart, and `/api/health` check: [`narwal-backend/.github/workflows/deploy-aws.yml`](../narwal-backend/.github/workflows/deploy-aws.yml).
