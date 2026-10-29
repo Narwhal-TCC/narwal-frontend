@@ -93,16 +93,16 @@ jobs:
           region = "${{ env.AWS_REGION }}"
           EOF
 
-      - name: Terraform init and apply
+      - name: Terraform init (read shared state — no apply)
         working-directory: narwal-backend
-        env:
-          APP_BUCKET_NAME: ${{ secrets.APP_BUCKET_NAME }}
         run: |
           set -euo pipefail
+          # Infra changes run from narwal-backend deploy-aws only. Applying here races with backend
+          # and can attach a deleted EBS volume (InvalidVolume.NotFound).
           terraform -chdir=infra init -backend-config=backend.hcl
-          terraform -chdir=infra apply -auto-approve \
+          terraform -chdir=infra refresh \
             -var="aws_region=${{ env.AWS_REGION }}" \
-            -var="app_bucket_name=${APP_BUCKET_NAME}"
+            -var="app_bucket_name=${{ secrets.APP_BUCKET_NAME }}"
 
       - name: Export Terraform outputs
         id: export
