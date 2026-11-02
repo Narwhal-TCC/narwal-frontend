@@ -26,6 +26,8 @@ function renderSidebar(initialPath = '/') {
         <MemoryRouter initialEntries={[initialPath]}>
           <Routes>
             <Route path="/" element={<Sidebar />} />
+            <Route path="/campaigns" element={<Sidebar />} />
+            <Route path="/campaigns/:id" element={<Sidebar />} />
             <Route path="/login" element={<div>Login Page</div>} />
           </Routes>
         </MemoryRouter>
@@ -60,6 +62,31 @@ describe('Sidebar', () => {
       '/analises/nova',
     )
     expect(screen.getByRole('link', { name: /Histórico/i })).toHaveAttribute('href', '/historico')
+    expect(screen.getByRole('link', { name: /Campanhas/i })).toHaveAttribute('href', '/campaigns')
+  })
+
+  it('marks Campanhas active on list and detail routes', () => {
+    const { rerender } = renderSidebar('/campaigns')
+
+    const campanhasLink = () => screen.getByRole('link', { name: /Campanhas/i })
+    expect(campanhasLink().className).toMatch(/font-semibold/)
+
+    rerender(
+      <ThemeProvider>
+        <AuthProvider>
+          <MemoryRouter initialEntries={['/campaigns/camp-1']}>
+            <Routes>
+              <Route path="/" element={<Sidebar />} />
+              <Route path="/campaigns" element={<Sidebar />} />
+              <Route path="/campaigns/:id" element={<Sidebar />} />
+              <Route path="/login" element={<div>Login Page</div>} />
+            </Routes>
+          </MemoryRouter>
+        </AuthProvider>
+      </ThemeProvider>,
+    )
+
+    expect(campanhasLink().className).toMatch(/font-semibold/)
   })
 
   it('shows operator identity from auth profile', async () => {
