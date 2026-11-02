@@ -11,7 +11,7 @@ vi.mock('../api/campaigns', () => ({
   getCampaign: vi.fn(),
 }))
 
-import { listCampaigns } from '../api/campaigns'
+import { createCampaign, listCampaigns, updateCampaign } from '../api/campaigns'
 
 const sampleCampaigns = [
   {
@@ -43,6 +43,8 @@ function renderPage() {
 describe('CampaignsPage', () => {
   beforeEach(() => {
     vi.mocked(listCampaigns).mockReset()
+    vi.mocked(createCampaign).mockReset()
+    vi.mocked(updateCampaign).mockReset()
   })
 
   it('renders a row per campaign with simulated badge', async () => {
@@ -74,6 +76,110 @@ describe('CampaignsPage', () => {
 
     const link = await screen.findByTestId('campaign-map-camp-1')
     expect(link).toHaveAttribute('href', '/campaigns/camp-1')
+  })
+
+  it('creates a campaign via POST and refreshes the list', async () => {
+    vi.mocked(listCampaigns).mockResolvedValue([])
+    vi.mocked(createCampaign).mockResolvedValue(sampleCampaigns[1])
+
+    renderPage()
+
+    fireEvent.click(await screen.findByTestId('campaign-create-empty'))
+    fireEvent.change(screen.getByTestId('campaign-form-name'), {
+      target: { value: 'Nova Baía' },
+    })
+    fireEvent.change(screen.getByTestId('campaign-form-min-lat'), {
+      target: { value: '-23' },
+    })
+    fireEvent.change(screen.getByTestId('campaign-form-max-lat'), {
+      target: { value: '-22' },
+    })
+    fireEvent.change(screen.getByTestId('campaign-form-min-lon'), {
+      target: { value: '-46' },
+    })
+    fireEvent.change(screen.getByTestId('campaign-form-max-lon'), {
+      target: { value: '-45' },
+    })
+    fireEvent.click(screen.getByTestId('campaign-form-submit'))
+
+    await waitFor(() => {
+      expect(createCampaign).toHaveBeenCalledWith({
+        name: 'Nova Baía',
+        area: { min_lat: -23, min_lon: -46, max_lat: -22, max_lon: -45 },
+        simulated: false,
+      })
+    })
+    await waitFor(() => {
+      expect(listCampaigns).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  it('PATCHes name and simulated only when analyses_count > 0', async () => {
+    vi.mocked(listCampaigns).mockResolvedValue([sampleCampaigns[0]])
+    vi.mocked(updateCampaign).mockResolvedValue({
+      ...sampleCampaigns[0],
+      name: 'Costa Renomeada',
+      simulated: false,
+    })
+
+    renderPage()
+
+    fireEvent.click(await screen.findByTestId('campaign-edit-camp-1'))
+    expect(screen.getByTestId('campaign-form-min-lat')).toBeDisabled()
+
+    fireEvent.change(screen.getByTestId('campaign-form-name'), {
+      target: { value: 'Costa Renomeada' },
+    })
+    fireEvent.click(screen.getByTestId('campaign-form-submit'))
+
+    await waitFor(() => {
+      expect(updateCampaign).toHaveBeenCalledWith('camp-1', {
+        name: 'Costa Renomeada',
+        simulated: true,
+      })
+    })
+    expect(updateCampaign).toHaveBeenCalledWith(
+      'camp-1',
+      expect.not.objectContaining({ area: expect.anything() }),
+    )
+  })
+
+  it('shows backend error on 409 and keeps the form open', async () => {
+    vi.mocked(listCampaigns).mockResolvedValue([sampleCampaigns[1]])
+    vi.mocked(updateCampaign).mockRejectedValue(
+      new ApiError('AREA_LOCKED', 'Não é possível alterar a área.', 409),
+    )
+
+    renderPage()
+
+    fireEvent.click(await screen.findByTestId('campaign-edit-camp-2'))
+    fireEvent.change(screen.getByTestId('campaign-form-name'), {
+      target: { value: 'Conflito' },
+    })
+    fireEvent.click(screen.getByTestId('campaign-form-submit'))
+
+    expect(
+      await screen.findByRole('alert'),
+    ).toHaveTextContent('Não é possível alterar a área.')
+    expect(screen.getByTestId('campaign-form-submit')).toBeInTheDocument()
+  })
+
+  it('blocks submit with invalid coordinates before calling the API', async () => {
+    vi.mocked(listCampaigns).mockResolvedValue([])
+
+    renderPage()
+
+    fireEvent.click(await screen.findByTestId('campaign-create-empty'))
+    fireEvent.change(screen.getByTestId('campaign-form-name'), {
+      target: { value: 'Teste' },
+    })
+    fireEvent.change(screen.getByTestId('campaign-form-min-lat'), {
+      target: { value: 'abc' },
+    })
+    fireEvent.click(screen.getByTestId('campaign-form-submit'))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Coordenadas inválidas')
+    expect(createCampaign).not.toHaveBeenCalled()
   })
 
   it('shows load error and retries list fetch', async () => {
