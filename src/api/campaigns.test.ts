@@ -1,5 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { getCampaignPoints, listCampaigns } from './campaigns'
+import { ApiError } from './client'
+import {
+  createCampaign,
+  getCampaign,
+  getCampaignPoints,
+  listCampaigns,
+  updateCampaign,
+} from './campaigns'
 
 const SAMPLE_CAMPAIGN = {
   id: 'camp-1',
@@ -38,6 +45,77 @@ describe('campaigns API', () => {
     expect(result).toHaveLength(1)
     expect(result[0].id).toBe('camp-1')
     expect(result[0].area.min_lat).toBe(38.0)
+  })
+
+  it('getCampaign calls GET /api/campaigns/{id}', async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify(SAMPLE_CAMPAIGN), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    )
+
+    const result = await getCampaign('camp-1')
+
+    expect(vi.mocked(fetch).mock.calls[0][0]).toBe('/api/campaigns/camp-1')
+    expect(result.id).toBe('camp-1')
+  })
+
+  it('createCampaign POSTs JSON to /api/campaigns', async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify(SAMPLE_CAMPAIGN), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    )
+
+    const body = {
+      name: 'Nova',
+      area: SAMPLE_CAMPAIGN.area,
+      simulated: false,
+    }
+    await createCampaign(body)
+
+    const [url, options] = vi.mocked(fetch).mock.calls[0]
+    expect(url).toBe('/api/campaigns')
+    expect(options?.method).toBe('POST')
+    expect(JSON.parse(options?.body as string)).toEqual(body)
+  })
+
+  it('updateCampaign PATCHes JSON to /api/campaigns/{id}', async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify({ ...SAMPLE_CAMPAIGN, name: 'Renomeada' }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    )
+
+    await updateCampaign('camp-1', { name: 'Renomeada' })
+
+    const [url, options] = vi.mocked(fetch).mock.calls[0]
+    expect(url).toBe('/api/campaigns/camp-1')
+    expect(options?.method).toBe('PATCH')
+    expect(JSON.parse(options?.body as string)).toEqual({ name: 'Renomeada' })
+  })
+
+  it('createCampaign throws ApiError with message from error body', async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(
+        JSON.stringify({ code: 'DUPLICATE_NAME', message: 'Nome já existe.' }),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
+      ),
+    )
+
+    await expect(
+      createCampaign({
+        name: 'Dup',
+        area: SAMPLE_CAMPAIGN.area,
+        simulated: true,
+      }),
+    ).rejects.toMatchObject({
+      message: 'Nome já existe.',
+      status: 409,
+    } satisfies Partial<ApiError>)
   })
 
   it('getCampaignPoints calls GET /api/campaigns/{id}/points', async () => {
