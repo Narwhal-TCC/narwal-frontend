@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -31,7 +32,15 @@ vi.mock('react-leaflet', () => ({
   MapContainer: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="map-container">{children}</div>
   ),
-  TileLayer: () => null,
+  TileLayer: () => {
+    const [tileError, setTileError] = useState(false)
+    useEffect(() => {
+      setTileError(true)
+    }, [])
+    return tileError ? (
+      <div data-testid="basemap-tiles-failed" aria-hidden />
+    ) : null
+  },
   Rectangle: ({ bounds }: { bounds: unknown }) => (
     <div data-testid="area-rectangle" data-bounds={JSON.stringify(bounds)} />
   ),
@@ -182,6 +191,7 @@ describe('CampaignMap', () => {
 
     fireEvent.click(screen.getByTestId('heatmap-toggle'))
     expect(screen.getByTestId('heatmap-layer')).toBeInTheDocument()
+    expect(screen.getAllByTestId('map-marker')).toHaveLength(2)
     expect(leafletMocks.heatLayer).toHaveBeenCalled()
 
     fireEvent.click(screen.getByTestId('heatmap-toggle'))
@@ -189,15 +199,39 @@ describe('CampaignMap', () => {
   })
 
   it('shows popup details and link to the analysis', () => {
-    renderMap([enteredMilco])
+    const dateFormat = vi.spyOn(Intl, 'DateTimeFormat').mockImplementation(
+      () =>
+        ({
+          format: () => '20 de jan. de 2026, 11:30',
+        }) as Intl.DateTimeFormat,
+    )
+    const formattedDate = '20 de jan de 2026, 11:30'
 
-    const popup = screen.getByTestId('map-popup')
-    expect(within(popup).getByText('MILCO')).toBeInTheDocument()
-    expect(within(popup).getByText('MILCO: 2')).toBeInTheDocument()
-    expect(within(popup).getByText('Detecções: 3')).toBeInTheDocument()
-    expect(
-      within(popup).getByRole('link', { name: 'Ver análise' }),
-    ).toHaveAttribute('href', '/analises/01234567-89ab-cdef-0123-456789abcdef')
+    try {
+      renderMap([enteredMilco])
+
+      const popup = screen.getByTestId('map-popup')
+      expect(within(popup).getByText('MILCO')).toBeInTheDocument()
+      expect(within(popup).getByText('MILCO: 2')).toBeInTheDocument()
+      expect(within(popup).getByText('Detecções: 3')).toBeInTheDocument()
+      expect(within(popup).getByText(formattedDate)).toBeInTheDocument()
+      expect(
+        within(popup).getByRole('link', { name: 'Ver análise' }),
+      ).toHaveAttribute(
+        'href',
+        '/analises/01234567-89ab-cdef-0123-456789abcdef',
+      )
+    } finally {
+      dateFormat.mockRestore()
+    }
+  })
+
+  it('keeps area and markers visible when basemap tiles fail', () => {
+    renderMap()
+
+    expect(screen.getByTestId('basemap-tiles-failed')).toBeInTheDocument()
+    expect(screen.getByTestId('area-rectangle')).toBeInTheDocument()
+    expect(screen.getAllByTestId('map-marker')).toHaveLength(2)
   })
 
   it('shows empty state when there are no points', () => {
