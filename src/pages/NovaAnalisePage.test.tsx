@@ -303,10 +303,13 @@ describe('NovaAnalisePage', () => {
     const state = navigationState as { file?: File; modelId?: string }
     expect(state.file).toBe(file)
     expect(state.modelId).toBeUndefined()
-    expect(createAnalysis).toHaveBeenCalledWith(file, undefined)
-    expect(createAnalysis).not.toHaveBeenCalledWith(
-      file,
-      'yolo-convnext-balanced',
-    )
+    expect(createAnalysis).toHaveBeenCalledWith(file, {
+      campaignId: '',
+      modelId: undefined,
+    })
+    expect(createAnalysis).not.toHaveBeenCalledWith(file, {
+      campaignId: '',
+      modelId: 'yolo-convnext-balanced',
+    })
   })
 })

@@ -31,7 +31,16 @@ export function LoadingPage() {
     let cancelled = false
 
     // Shared promise across Strict Mode remount so POST /analyses runs once.
-    createAnalysisOnce(file, createAnalysis, modelId)
+    // campaignId filled in T6; placeholder keeps compile until upload forwards it.
+    createAnalysisOnce(
+      file,
+      (uploadFile, uploadModelId) =>
+        createAnalysis(uploadFile, {
+          campaignId: '',
+          modelId: uploadModelId,
+        }),
+      modelId,
+    )
       .then((result) => {
         if (cancelled) return
         clearPendingUploadFile()

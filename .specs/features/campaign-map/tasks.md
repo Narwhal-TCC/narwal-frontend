@@ -125,8 +125,8 @@ T8 → T9 → T10 → T11
 
 **Done when**:
 
-- [ ] Tests: FormData has `campaign_id`; lat/lon present only when given; never `coordinates`/`campaign_name`
-- [ ] Gate check passes: `npm test`
+- [x] Tests: FormData has `campaign_id`; lat/lon present only when given; never `coordinates`/`campaign_name`
+- [x] Gate check passes: `npm test`
 
 **Tests**: unit
 **Gate**: quick

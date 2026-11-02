@@ -60,7 +60,10 @@ describe('LoadingPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Result Page')).toBeInTheDocument()
     })
-    expect(createAnalysis).toHaveBeenCalledWith(file, undefined)
+    expect(createAnalysis).toHaveBeenCalledWith(file, {
+      campaignId: '',
+      modelId: undefined,
+    })
   })
 
   it('forwards modelId from navigation state to createAnalysis', async () => {
@@ -88,7 +91,10 @@ describe('LoadingPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Result Page')).toBeInTheDocument()
     })
-    expect(createAnalysis).toHaveBeenCalledWith(file, 'yolo-convnext-recall')
+    expect(createAnalysis).toHaveBeenCalledWith(file, {
+      campaignId: '',
+      modelId: 'yolo-convnext-recall',
+    })
   })
 
   it('posts createAnalysis only once under React Strict Mode remount', async () => {

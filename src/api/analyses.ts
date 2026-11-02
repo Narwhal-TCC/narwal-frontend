@@ -9,6 +9,8 @@ export type AiReason =
   | 'rate_limited'
   | 'invalid_response'
 
+export type LocationSource = 'entered' | 'simulated'
+
 export interface AiDetectionNote {
   index: number
   note: string
@@ -35,6 +37,17 @@ export interface Detection {
   detector_score?: number
 }
 
+export interface CampaignRef {
+  id: string
+  name: string
+}
+
+export interface AnalysisLocation {
+  lat: number
+  lon: number
+  source: LocationSource
+}
+
 export interface AnalysisSummary {
   id: string
   org_id: string
@@ -45,7 +58,8 @@ export interface AnalysisSummary {
   detection_count: number
   model_id?: string
   campaign_name?: string | null
-  coordinates?: string | null
+  campaign?: CampaignRef | null
+  location?: AnalysisLocation | null
   collected_at?: string | null
 }
 
@@ -62,7 +76,8 @@ export interface AnalysisResult {
   inference_ms: number | null
   model_id?: string
   campaign_name?: string | null
-  coordinates?: string | null
+  campaign?: CampaignRef | null
+  location?: AnalysisLocation | null
   collected_at?: string | null
   ai_analysis?: AiAnalysis | null
 }
@@ -71,6 +86,25 @@ export interface AnalysisListResponse {
   items: AnalysisSummary[]
   limit: number
   offset: number
+}
+
+export interface ActiveCampaign {
+  id: string | null
+  name: string
+}
+
+export interface OrgStatsResponse {
+  analyses_count: number
+  milco_detections_count: number
+  last_analysis: AnalysisSummary | null
+  active_campaign: ActiveCampaign | null
+}
+
+export interface CreateAnalysisOptions {
+  campaignId: string
+  modelId?: string
+  latitude?: number
+  longitude?: number
 }
 
 export async function listAnalyses(
@@ -88,14 +122,25 @@ export async function getAnalysis(id: string): Promise<AnalysisResult> {
   return apiRequest<AnalysisResult>(`/api/analyses/${id}`)
 }
 
+export async function getOrgStats(): Promise<OrgStatsResponse> {
+  return apiRequest<OrgStatsResponse>('/api/analyses/stats')
+}
+
 export async function createAnalysis(
   file: File,
-  modelId?: string,
+  options: CreateAnalysisOptions,
 ): Promise<AnalysisResult> {
   const formData = new FormData()
   formData.append('file', file)
-  if (modelId !== undefined) {
-    formData.append('model_id', modelId)
+  formData.append('campaign_id', options.campaignId)
+  if (options.modelId !== undefined) {
+    formData.append('model_id', options.modelId)
+  }
+  if (options.latitude !== undefined) {
+    formData.append('latitude', String(options.latitude))
+  }
+  if (options.longitude !== undefined) {
+    formData.append('longitude', String(options.longitude))
   }
   return apiRequest<AnalysisResult>('/api/analyses', {
     method: 'POST',
