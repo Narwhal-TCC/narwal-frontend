@@ -1,6 +1,9 @@
-import type { AnalysisResult } from '../api/analyses'
+import type { AnalysisResult, CreateAnalysisOptions } from '../api/analyses'
 
-type CreateFn = (file: File, modelId?: string) => Promise<AnalysisResult>
+type CreateFn = (
+  file: File,
+  options: CreateAnalysisOptions,
+) => Promise<AnalysisResult>
 
 let inFlightKey: string | null = null
 let inFlight: Promise<AnalysisResult> | null = null
@@ -9,23 +12,25 @@ function fileKey(file: File): string {
   return `${file.name}:${file.size}:${file.lastModified}`
 }
 
-function uploadKey(file: File, modelId?: string): string {
-  return `${fileKey(file)}:${modelId ?? ''}`
+function uploadKey(file: File, options: CreateAnalysisOptions): string {
+  const lat = options.latitude ?? ''
+  const lon = options.longitude ?? ''
+  return `${fileKey(file)}:${options.modelId ?? ''}:${options.campaignId}:${lat}:${lon}`
 }
 
 /** Dedupes concurrent create calls for the same file (e.g. React Strict Mode). */
 export function createAnalysisOnce(
   file: File,
   create: CreateFn,
-  modelId?: string,
+  options: CreateAnalysisOptions,
 ): Promise<AnalysisResult> {
-  const key = uploadKey(file, modelId)
+  const key = uploadKey(file, options)
   if (inFlight && inFlightKey === key) {
     return inFlight
   }
 
   inFlightKey = key
-  inFlight = create(file, modelId).finally(() => {
+  inFlight = create(file, options).finally(() => {
     if (inFlightKey === key) {
       inFlight = null
       inFlightKey = null

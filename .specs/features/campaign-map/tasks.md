@@ -149,8 +149,8 @@ T8 → T9 → T10 → T11
 
 **Done when**:
 
-- [ ] Same file with different campaign is not deduped
-- [ ] Gate check passes: `npm test`
+- [x] Same file with different campaign is not deduped
+- [x] Gate check passes: `npm test`
 
 **Tests**: unit
 **Gate**: quick
