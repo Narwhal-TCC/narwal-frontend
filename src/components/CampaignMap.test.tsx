@@ -308,10 +308,13 @@ describe('CampaignMap', () => {
 
     expect(screen.queryByTestId('detection-class-legend')).not.toBeInTheDocument()
     expect(screen.getByTestId('campaign-map-legend')).toBeInTheDocument()
-    expect(screen.getByTestId('campaign-map-legend')).toHaveTextContent('MILCO')
-    expect(screen.getByTestId('campaign-map-legend')).toHaveTextContent(
-      'Coord. simulada',
-    )
+    const legend = screen.getByTestId('campaign-map-legend')
+    expect(legend).toHaveTextContent('Classes')
+    expect(legend).toHaveTextContent('Geometria e origem')
+    expect(legend).toHaveTextContent('MILCO')
+    expect(legend).toHaveTextContent('Coord. simulada')
+    expect(legend).toHaveTextContent('(Contorno)')
+    expect(legend).toHaveTextContent('(Preenchido)')
 
     fireEvent.click(screen.getByTestId('campaign-map-legend-close'))
     expect(screen.queryByTestId('campaign-map-legend')).not.toBeInTheDocument()

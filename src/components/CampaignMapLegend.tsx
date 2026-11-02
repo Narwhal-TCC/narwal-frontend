@@ -14,11 +14,11 @@ function LegendSwatch({
     return (
       <span
         aria-hidden
-        className="inline-block size-3 shrink-0 rounded-sm border-2"
+        className="inline-block size-3.5 shrink-0 rounded-sm border-2"
         style={{
           borderColor: color,
           backgroundColor: filled ? color : 'transparent',
-          opacity: filled ? 0.35 : 1,
+          opacity: filled ? 0.25 : 1,
         }}
       />
     )
@@ -26,27 +26,52 @@ function LegendSwatch({
   return (
     <span
       aria-hidden
-      className="inline-block size-3 shrink-0 rounded-full border-2"
+      className="inline-block size-3.5 shrink-0 rounded-full border-2"
       style={{
         borderColor: color,
         backgroundColor: filled ? color : 'transparent',
+        opacity: filled ? 0.9 : 1,
       }}
     />
   )
 }
 
-function LegendRow({
+function LegendSection({
+  title,
+  children,
+}: {
+  title: string
+  children: ReactNode
+}) {
+  return (
+    <section className="space-y-2">
+      <h3 className="text-[10px] font-semibold uppercase tracking-[0.55px] text-[color:var(--navi-muted)]">
+        {title}
+      </h3>
+      <ul className="space-y-2">{children}</ul>
+    </section>
+  )
+}
+
+function LegendEntry({
   swatch,
   label,
+  hint,
 }: {
   swatch: ReactNode
   label: string
+  hint?: string
 }) {
   return (
-    <div className="flex items-center gap-2 text-xs text-[color:var(--navi-text)]">
+    <li className="flex items-center gap-2.5 text-xs text-[color:var(--navi-text)]">
       {swatch}
-      <span className="leading-tight">{label}</span>
-    </div>
+      <span className="min-w-0 leading-snug">
+        {label}
+        {hint ? (
+          <span className="text-[color:var(--navi-muted)]"> ({hint})</span>
+        ) : null}
+      </span>
+    </li>
   )
 }
 
@@ -60,7 +85,7 @@ export function CampaignMapLegend() {
         data-testid="campaign-map-legend-open"
         aria-label="Mostrar legenda do mapa"
         onClick={() => setOpen(true)}
-        className="absolute bottom-4 right-4 z-[1000] rounded-md border border-[color:var(--navi-border)] bg-[color:var(--navi-panel)] px-3 py-1.5 text-xs font-medium text-[color:var(--navi-link)] shadow-md hover:bg-[color:var(--navi-surface-tint)]"
+        className="absolute bottom-4 right-4 z-[1000] rounded-md border border-[color:var(--navi-border-strong)] bg-[color:var(--navi-panel)] px-3 py-1.5 text-xs font-semibold text-[color:var(--navi-text)] shadow-md transition hover:border-[color:var(--navi-link)] hover:shadow-lg"
       >
         Legenda
       </button>
@@ -70,9 +95,9 @@ export function CampaignMapLegend() {
   return (
     <div
       data-testid="campaign-map-legend"
-      className="absolute bottom-4 right-4 z-[1000] w-[min(100%-2rem,300px)] rounded-lg border border-[color:var(--navi-border)] bg-[color:var(--navi-panel)] p-3 shadow-md"
+      className="absolute bottom-4 right-4 z-[1000] w-[min(100%-2rem,320px)] overflow-hidden rounded-lg border border-[color:var(--navi-border)] bg-[color:var(--navi-panel)] shadow-md"
     >
-      <div className="mb-2.5 flex items-start justify-between gap-2">
+      <div className="flex items-center justify-between gap-2 border-b border-[color:var(--navi-border-subtle)] px-3 py-2.5">
         <p className="text-sm font-semibold text-[color:var(--navi-text)]">
           Legenda
         </p>
@@ -81,53 +106,61 @@ export function CampaignMapLegend() {
           data-testid="campaign-map-legend-close"
           aria-label="Ocultar legenda"
           onClick={() => setOpen(false)}
-          className="leading-none text-lg text-[color:var(--navi-muted)] hover:text-[color:var(--navi-text)]"
+          className="flex size-7 items-center justify-center rounded-md border border-[color:var(--navi-border-subtle)] text-sm font-semibold text-[color:var(--navi-muted)] transition hover:border-[color:var(--navi-border-strong)] hover:bg-[color:var(--navi-surface-tint)] hover:text-[color:var(--navi-text)]"
         >
           ×
         </button>
       </div>
 
-      <div className="grid grid-cols-2 gap-x-3 gap-y-2">
-        <LegendRow
-          swatch={
-            <LegendSwatch color={MAP_MARKER_COLORS.MILCO} filled />
-          }
-          label="MILCO"
-        />
-        <LegendRow
-          swatch={
-            <LegendSwatch color={MAP_MARKER_COLORS.NOMBO} filled />
-          }
-          label="NOMBO"
-        />
-        <LegendRow
-          swatch={
-            <LegendSwatch color={MAP_MARKER_COLORS.none} filled />
-          }
-          label="Sem classe"
-        />
-        <LegendRow
-          swatch={
-            <LegendSwatch
-              color="var(--navi-accent)"
-              filled={false}
-              shape="box"
-            />
-          }
-          label="Área da campanha"
-        />
-        <LegendRow
-          swatch={
-            <LegendSwatch color={MAP_MARKER_COLORS.MILCO} filled />
-          }
-          label="Coord. informada"
-        />
-        <LegendRow
-          swatch={
-            <LegendSwatch color={MAP_MARKER_COLORS.MILCO} filled={false} />
-          }
-          label="Coord. simulada"
-        />
+      <div className="space-y-4 px-3 py-3">
+        <LegendSection title="Classes">
+          <LegendEntry
+            swatch={
+              <LegendSwatch color={MAP_MARKER_COLORS.MILCO} filled />
+            }
+            label="MILCO"
+          />
+          <LegendEntry
+            swatch={
+              <LegendSwatch color={MAP_MARKER_COLORS.NOMBO} filled />
+            }
+            label="NOMBO"
+          />
+          <LegendEntry
+            swatch={
+              <LegendSwatch color={MAP_MARKER_COLORS.none} filled />
+            }
+            label="Sem classe"
+          />
+        </LegendSection>
+
+        <LegendSection title="Geometria e origem">
+          <LegendEntry
+            swatch={
+              <LegendSwatch
+                color="var(--navi-accent)"
+                filled={false}
+                shape="box"
+              />
+            }
+            label="Área da campanha"
+            hint="Contorno"
+          />
+          <LegendEntry
+            swatch={
+              <LegendSwatch color={MAP_MARKER_COLORS.MILCO} filled />
+            }
+            label="Coord. informada"
+            hint="Preenchido"
+          />
+          <LegendEntry
+            swatch={
+              <LegendSwatch color={MAP_MARKER_COLORS.MILCO} filled={false} />
+            }
+            label="Coord. simulada"
+            hint="Contorno"
+          />
+        </LegendSection>
       </div>
     </div>
   )
