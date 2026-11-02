@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { Campaign, CampaignPoint } from '../api/campaigns'
 import {
   campaignAreaBounds,
+  formatDetectionRowSubtitle,
   formatPrimaryConfidence,
   hasSimulatedData,
   heatLayerPoints,
@@ -107,6 +108,20 @@ describe('formatPrimaryConfidence', () => {
   it('formats confidence as a percentage label', () => {
     expect(formatPrimaryConfidence(0.876)).toBe('88% conf.')
     expect(formatPrimaryConfidence(null)).toBe('—')
+  })
+})
+
+describe('formatDetectionRowSubtitle', () => {
+  it('includes confidence and detection counts', () => {
+    expect(formatDetectionRowSubtitle(basePoint)).toBe(
+      '90% conf. · 1 detecções · MILCO 1',
+    )
+  })
+
+  it('omits confidence when unavailable', () => {
+    expect(
+      formatDetectionRowSubtitle({ ...basePoint, primary_confidence: null }),
+    ).toBe('1 detecções · MILCO 1')
   })
 })
 

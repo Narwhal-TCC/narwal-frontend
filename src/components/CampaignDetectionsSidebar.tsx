@@ -1,8 +1,8 @@
 import type { CampaignPoint } from '../api/campaigns'
 import { icoEye, icoEyeOff, icoMapPin } from '../assets'
 import {
+  formatDetectionRowSubtitle,
   formatPointCoordinates,
-  formatPrimaryConfidence,
 } from '../domain/campaignMap'
 import {
   classGroupLabel,
@@ -209,12 +209,10 @@ export function CampaignDetectionsSidebar({
                                 {formatPointCoordinates(point.lat, point.lon)}
                               </p>
                               <p
-                                data-testid={`detection-row-confidence-${point.analysis_id}`}
+                                data-testid={`detection-row-subtitle-${point.analysis_id}`}
                                 className="truncate text-xs text-[color:var(--navi-muted)]"
                               >
-                                {formatPrimaryConfidence(
-                                  point.primary_confidence,
-                                )}
+                                {formatDetectionRowSubtitle(point)}
                               </p>
                             </div>
                           </div>

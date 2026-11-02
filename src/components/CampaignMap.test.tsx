@@ -320,9 +320,9 @@ describe('CampaignMap', () => {
     ).toHaveTextContent('38.50000, -9.40000')
     expect(
       screen.getByTestId(
-        `detection-row-confidence-${enteredMilco.analysis_id}`,
+        `detection-row-subtitle-${enteredMilco.analysis_id}`,
       ),
-    ).toHaveTextContent('92% conf.')
+    ).toHaveTextContent('92% conf. · 3 detecções · MILCO 2')
   })
 
   it('hides markers when a class visibility toggle is off', () => {

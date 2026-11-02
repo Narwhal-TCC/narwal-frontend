@@ -161,6 +161,15 @@ export function formatPrimaryConfidence(confidence: number | null): string {
   return `${Math.round(confidence * 100)}% conf.`
 }
 
+export function formatDetectionRowSubtitle(point: CampaignPoint): string {
+  const counts = `${point.detection_count} detecções · MILCO ${point.milco_detection_count}`
+  const confidence = formatPrimaryConfidence(point.primary_confidence)
+  if (confidence === '—') {
+    return counts
+  }
+  return `${confidence} · ${counts}`
+}
+
 export function markerPathOptions(
   primaryClass: PrimaryClass | null,
   locationSource: LocationSource,

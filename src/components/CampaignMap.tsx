@@ -355,7 +355,7 @@ export function CampaignMap({ campaign, points }: CampaignMapProps) {
           {showSimulatedBadge ? (
             <span
               data-testid="simulated-location-badge"
-              className="pointer-events-auto rounded px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide bg-[color-mix(in_srgb,var(--navi-nombo)_18%,transparent)] text-[color:var(--navi-link)] backdrop-blur-sm"
+              className="pointer-events-auto rounded-md border border-[color:var(--navi-nombo)] bg-[color:var(--navi-panel)] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--navi-nombo)] shadow-sm"
             >
               Dados de localização simulados
             </span>
