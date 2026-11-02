@@ -13,6 +13,7 @@ const leafletMocks = vi.hoisted(() => {
     fitBounds: vi.fn(),
     flyTo: vi.fn(),
     getZoom: vi.fn(() => 10),
+    invalidateSize: vi.fn(),
     addLayer,
     removeLayer: vi.fn(),
     heatLayer,
@@ -31,10 +32,19 @@ vi.mock('leaflet', async (importOriginal) => {
   }
 })
 
+vi.stubGlobal(
+  'ResizeObserver',
+  class {
+    observe() {}
+    disconnect() {}
+  },
+)
+
 vi.mock('react-leaflet', () => ({
   MapContainer: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="map-container">{children}</div>
   ),
+  ZoomControl: () => <div data-testid="zoom-control" />,
   TileLayer: () => {
     const [tileError, setTileError] = useState(false)
     useEffect(() => {
@@ -86,6 +96,8 @@ vi.mock('react-leaflet', () => ({
     fitBounds: leafletMocks.fitBounds,
     flyTo: leafletMocks.flyTo,
     getZoom: leafletMocks.getZoom,
+    invalidateSize: leafletMocks.invalidateSize,
+    getContainer: () => document.createElement('div'),
     addLayer: leafletMocks.addLayer,
     removeLayer: leafletMocks.removeLayer,
   }),
@@ -106,6 +118,7 @@ const enteredMilco: CampaignPoint = {
   lon: -9.4,
   location_source: 'entered',
   primary_class: 'MILCO',
+  primary_confidence: 0.92,
   milco_detection_count: 2,
   detection_count: 3,
   created_at: '2026-01-20T14:30:00Z',
@@ -117,6 +130,7 @@ const simulatedNombo: CampaignPoint = {
   lon: -9.35,
   location_source: 'simulated',
   primary_class: 'NOMBO',
+  primary_confidence: 0.81,
   milco_detection_count: 0,
   detection_count: 1,
   created_at: '2026-01-21T10:00:00Z',
@@ -301,6 +315,14 @@ describe('CampaignMap', () => {
     expect(screen.getByTestId('campaign-detections-sidebar')).toBeInTheDocument()
     expect(screen.getByTestId('class-group-MILCO')).toBeInTheDocument()
     expect(screen.getByTestId('class-group-NOMBO')).toBeInTheDocument()
+    expect(
+      screen.getByTestId(`detection-row-coords-${enteredMilco.analysis_id}`),
+    ).toHaveTextContent('38.50000, -9.40000')
+    expect(
+      screen.getByTestId(
+        `detection-row-confidence-${enteredMilco.analysis_id}`,
+      ),
+    ).toHaveTextContent('92% conf.')
   })
 
   it('hides markers when a class visibility toggle is off', () => {

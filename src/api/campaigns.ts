@@ -26,6 +26,7 @@ export interface CampaignPoint {
   lon: number
   location_source: LocationSource
   primary_class: PrimaryClass | null
+  primary_confidence: number | null
   milco_detection_count: number
   detection_count: number
   created_at: string

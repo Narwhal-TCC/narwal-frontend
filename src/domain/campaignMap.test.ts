@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import type { Campaign, CampaignPoint } from '../api/campaigns'
 import {
+  campaignAreaBounds,
+  formatPrimaryConfidence,
   hasSimulatedData,
   heatLayerPoints,
   heatWeight,
   isMarkerFilled,
   locationSourceDescription,
+  mapViewBounds,
   markerColor,
   markerRadius,
 } from './campaignMap'
@@ -26,6 +29,7 @@ const basePoint: CampaignPoint = {
   lon: -9,
   location_source: 'entered',
   primary_class: 'MILCO',
+  primary_confidence: 0.9,
   milco_detection_count: 1,
   detection_count: 1,
   created_at: '2026-01-01T00:00:00Z',
@@ -65,6 +69,29 @@ describe('isMarkerFilled', () => {
 
   it('draws hollow markers for simulated positions', () => {
     expect(isMarkerFilled('simulated')).toBe(false)
+  })
+})
+
+describe('mapViewBounds', () => {
+  it('uses the campaign area when there are no points', () => {
+    expect(mapViewBounds(baseCampaign, [])).toEqual(
+      campaignAreaBounds(baseCampaign),
+    )
+  })
+
+  it('pads around analysis markers when points exist', () => {
+    const bounds = mapViewBounds(baseCampaign, [basePoint])
+    expect(bounds[0][0]).toBeLessThan(basePoint.lat)
+    expect(bounds[1][0]).toBeGreaterThan(basePoint.lat)
+    expect(bounds[0][1]).toBeLessThan(basePoint.lon)
+    expect(bounds[1][1]).toBeGreaterThan(basePoint.lon)
+  })
+})
+
+describe('formatPrimaryConfidence', () => {
+  it('formats confidence as a percentage label', () => {
+    expect(formatPrimaryConfidence(0.876)).toBe('88% conf.')
+    expect(formatPrimaryConfidence(null)).toBe('—')
   })
 })
 

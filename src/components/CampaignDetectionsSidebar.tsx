@@ -1,20 +1,14 @@
 import type { CampaignPoint } from '../api/campaigns'
-import { icoMapPin } from '../assets'
+import { icoEye, icoEyeOff, icoMapPin } from '../assets'
+import {
+  formatPointCoordinates,
+  formatPrimaryConfidence,
+} from '../domain/campaignMap'
 import {
   classGroupLabel,
   groupCampaignPoints,
   type ClassGroupKey,
 } from '../domain/campaignPointGroups'
-
-function formatRowDate(iso: string): string {
-  return new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  })
-    .format(new Date(iso))
-    .replace('.', '')
-}
 
 function EyeButton({
   visible,
@@ -38,13 +32,17 @@ function EyeButton({
         onToggle()
       }}
       className={[
-        'flex size-7 shrink-0 items-center justify-center rounded-md border text-xs transition',
+        'flex size-7 shrink-0 items-center justify-center rounded-md border transition',
         visible
-          ? 'border-[color:var(--navi-border-subtle)] text-[color:var(--navi-link)] hover:bg-[color:var(--navi-surface-tint)]'
-          : 'border-[color:var(--navi-border)] bg-[color:var(--navi-input-bg)] text-[color:var(--navi-muted)]',
+          ? 'border-[color:var(--navi-border-subtle)] hover:bg-[color:var(--navi-surface-tint)]'
+          : 'border-[color:var(--navi-border)] bg-[color:var(--navi-input-bg)]',
       ].join(' ')}
     >
-      {visible ? '👁' : '👁‍🗨'}
+      <img
+        src={visible ? icoEye : icoEyeOff}
+        alt=""
+        className="size-[18px]"
+      />
     </button>
   )
 }
@@ -215,12 +213,19 @@ export function CampaignDetectionsSidebar({
                               className="size-4 shrink-0 opacity-80"
                             />
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm text-[color:var(--navi-text)]">
-                                {formatRowDate(point.created_at)}
+                              <p
+                                data-testid={`detection-row-coords-${point.analysis_id}`}
+                                className="truncate font-mono text-sm text-[color:var(--navi-text)]"
+                              >
+                                {formatPointCoordinates(point.lat, point.lon)}
                               </p>
-                              <p className="truncate text-xs text-[color:var(--navi-muted)]">
-                                {point.detection_count} detecções · MILCO{' '}
-                                {point.milco_detection_count}
+                              <p
+                                data-testid={`detection-row-confidence-${point.analysis_id}`}
+                                className="truncate text-xs text-[color:var(--navi-muted)]"
+                              >
+                                {formatPrimaryConfidence(
+                                  point.primary_confidence,
+                                )}
                               </p>
                             </div>
                           </div>

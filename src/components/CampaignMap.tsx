@@ -15,15 +15,16 @@ import {
   Rectangle,
   TileLayer,
   useMap,
+  ZoomControl,
 } from 'react-leaflet'
 import type { Campaign, CampaignPoint } from '../api/campaigns'
 import { icoArrowRight, icoClock, icoMapPin } from '../assets'
 import { CampaignDetectionsSidebar } from './CampaignDetectionsSidebar'
 import {
-  campaignAreaBounds,
   hasSimulatedData,
   heatLayerPoints,
   locationSourceDescription,
+  mapViewBounds,
   markerPathOptions,
   markerRadius,
   milcoHeatGradient,
@@ -132,14 +133,26 @@ function CampaignMapPopup({ point }: { point: CampaignPoint }) {
   )
 }
 
-function FitBounds({
+function MapViewSync({
   bounds,
 }: {
   bounds: [[number, number], [number, number]]
 }) {
   const map = useMap()
   useEffect(() => {
-    map.fitBounds(bounds, { padding: [24, 24] })
+    const fit = () => {
+      map.invalidateSize()
+      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 })
+    }
+    fit()
+    const container = map.getContainer()
+    const observer = new ResizeObserver(() => {
+      fit()
+    })
+    observer.observe(container)
+    return () => {
+      observer.disconnect()
+    }
   }, [map, bounds])
   return null
 }
@@ -229,7 +242,18 @@ export function CampaignMap({ campaign, points }: CampaignMapProps) {
   )
   const markerRefs = useRef<Record<string, L.CircleMarker | null>>({})
 
-  const bounds = campaignAreaBounds(campaign)
+  const viewBounds = useMemo(
+    () => mapViewBounds(campaign, points),
+    [campaign, points],
+  )
+  const mapCenter = useMemo(
+    () =>
+      [
+        (viewBounds[0][0] + viewBounds[1][0]) / 2,
+        (viewBounds[0][1] + viewBounds[1][1]) / 2,
+      ] as [number, number],
+    [viewBounds],
+  )
   const showSimulatedBadge = hasSimulatedData(campaign, points)
 
   const visiblePoints = useMemo(
@@ -327,23 +351,29 @@ export function CampaignMap({ campaign, points }: CampaignMapProps) {
           className="min-h-0 flex-1 overflow-hidden bg-[color:var(--navi-image-bg)]"
         >
           <MapContainer
-            bounds={bounds}
+            center={mapCenter}
+            zoom={11}
             className="h-full w-full"
             style={{ height: '100%', width: '100%', minHeight: 0 }}
             scrollWheelZoom
+            zoomControl={false}
           >
+            <ZoomControl position="topright" />
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            <FitBounds bounds={bounds} />
+            <MapViewSync bounds={viewBounds} />
             <FlyToSelected
               selectedAnalysisId={selectedAnalysisId}
               points={visiblePoints}
               markerRefs={markerRefs}
             />
             <Rectangle
-              bounds={bounds}
+              bounds={[
+                [campaign.area.min_lat, campaign.area.min_lon],
+                [campaign.area.max_lat, campaign.area.max_lon],
+              ]}
               pathOptions={{
                 color: 'var(--navi-accent)',
                 weight: 2,

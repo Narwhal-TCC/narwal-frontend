@@ -13,6 +13,7 @@ const milcoPoint: CampaignPoint = {
   lon: 2,
   location_source: 'entered',
   primary_class: 'MILCO',
+  primary_confidence: 0.9,
   milco_detection_count: 2,
   detection_count: 3,
   created_at: '2026-01-20T14:30:00Z',

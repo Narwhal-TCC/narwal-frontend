@@ -158,6 +158,7 @@ describe('campaigns API', () => {
               lon: -9.0,
               location_source: 'simulated',
               primary_class: 'MILCO',
+              primary_confidence: 0.9,
               milco_detection_count: 1,
               detection_count: 1,
               created_at: '2026-09-08T12:00:00Z',
