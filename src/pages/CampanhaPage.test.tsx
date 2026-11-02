@@ -52,11 +52,11 @@ const sampleResponse = {
   ],
 }
 
-function renderPage(path = '/campanhas/camp-1') {
+function renderPage(path = '/campaigns/camp-1') {
   return render(
     <MemoryRouter initialEntries={[path]}>
       <Routes>
-        <Route path="/campanhas/:id" element={<CampanhaPage />} />
+        <Route path="/campaigns/:id" element={<CampanhaPage />} />
       </Routes>
     </MemoryRouter>,
   )
