@@ -6,9 +6,17 @@ import { HomePage } from './HomePage'
 vi.mock('../api/analyses', () => ({
   listAnalyses: vi.fn(),
   getAnalysis: vi.fn(),
+  getOrgStats: vi.fn(),
 }))
 
-import { getAnalysis, listAnalyses } from '../api/analyses'
+import { getAnalysis, getOrgStats, listAnalyses } from '../api/analyses'
+
+const emptyStats = {
+  analyses_count: 0,
+  milco_detections_count: 0,
+  last_analysis: null,
+  active_campaign: null,
+}
 
 function renderHome(initialPath = '/') {
   return render(
@@ -17,6 +25,7 @@ function renderHome(initialPath = '/') {
         <Route path="/" element={<HomePage />} />
         <Route path="/analises/nova" element={<div>Nova Análise Page</div>} />
         <Route path="/analises/:id" element={<div>Resultado Page</div>} />
+        <Route path="/campanhas/:id" element={<div>Campanha Page</div>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -26,6 +35,8 @@ describe('HomePage', () => {
   beforeEach(() => {
     vi.mocked(listAnalyses).mockReset()
     vi.mocked(getAnalysis).mockReset()
+    vi.mocked(getOrgStats).mockReset()
+    vi.mocked(getOrgStats).mockResolvedValue(emptyStats)
   })
 
   it('shows zero KPIs when the org has no analyses', async () => {
@@ -38,8 +49,9 @@ describe('HomePage', () => {
     })
     expect(screen.getByText('Detecções MILCO').closest('div')).toHaveTextContent('0')
     expect(screen.getByText('Última análise').closest('div')).toHaveTextContent('Nenhuma')
-    expect(screen.getByText('Santos 2026')).toBeInTheDocument()
+    expect(screen.getByText('Campanha ativa').closest('div')).toHaveTextContent('—')
     expect(screen.getByText('Nenhuma análise recente.')).toBeInTheDocument()
+    expect(screen.queryByText('Santos 2026')).not.toBeInTheDocument()
   })
 
   it('shows populated counts and survives a single enrich failure', async () => {
@@ -96,7 +108,36 @@ describe('HomePage', () => {
     })
     expect(screen.getByText('Detecções MILCO').closest('div')).toHaveTextContent('1')
     expect(screen.getByText('Última análise').closest('div')).toHaveTextContent('agora')
-    expect(screen.getByText('Campanha ativa').closest('div')).toHaveTextContent('Santos 2026')
+    expect(screen.getByText('Campanha ativa').closest('div')).toHaveTextContent('—')
+  })
+
+  it('shows active campaign from stats linked to the campaign map', async () => {
+    vi.mocked(listAnalyses).mockResolvedValue({ items: [], limit: 50, offset: 0 })
+    vi.mocked(getOrgStats).mockResolvedValue({
+      ...emptyStats,
+      active_campaign: { id: 'camp-1', name: 'Campanha Simulada' },
+    })
+
+    renderHome()
+
+    const link = await screen.findByRole('link', { name: 'Campanha Simulada' })
+    expect(link).toHaveAttribute('href', '/campanhas/camp-1')
+    expect(screen.queryByText('Santos 2026')).not.toBeInTheDocument()
+  })
+
+  it('shows campaign name without link when stats omit id', async () => {
+    vi.mocked(listAnalyses).mockResolvedValue({ items: [], limit: 50, offset: 0 })
+    vi.mocked(getOrgStats).mockResolvedValue({
+      ...emptyStats,
+      active_campaign: { id: null, name: 'Legado 2010' },
+    })
+
+    renderHome()
+
+    await waitFor(() => {
+      expect(screen.getByText('Legado 2010')).toBeInTheDocument()
+    })
+    expect(screen.queryByRole('link', { name: 'Legado 2010' })).not.toBeInTheDocument()
   })
 
   it('navigates to nova análise when CTA is clicked', async () => {

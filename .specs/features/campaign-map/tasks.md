@@ -317,8 +317,8 @@ T8 → T9 → T10 → T11
 
 **Done when**:
 
-- [ ] Tests for spec "Location on result and Home" AC 3-4
-- [ ] Gate check passes: `npm run build; npm test`
+- [x] Tests for spec "Location on result and Home" AC 3-4
+- [x] Gate check passes: `npm run build; npm test`
 
 **Tests**: unit
 **Gate**: build

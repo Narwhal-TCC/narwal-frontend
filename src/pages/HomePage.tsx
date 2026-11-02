@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { getAnalysis, listAnalyses } from '../api/analyses'
+import {
+  getAnalysis,
+  getOrgStats,
+  listAnalyses,
+  type ActiveCampaign,
+} from '../api/analyses'
 import { formatDeteccaoCount } from '../domain/ptPlural'
 import { analysisHasClass, countMilco } from '../domain/classification'
 import { shortId } from '../domain/idDisplay'
 
-const ACTIVE_CAMPAIGN = 'Santos 2026'
 const RECENT_LIMIT = 5
 
 interface RecentAnalysisRow {
@@ -20,6 +24,7 @@ interface DashboardData {
   milcoCount: number
   lastAnalysisLabel: string
   recentAnalyses: RecentAnalysisRow[]
+  activeCampaign: ActiveCampaign | null
 }
 
 function formatRelativeTime(isoDate: string): string {
@@ -60,8 +65,12 @@ function formatHeaderDate(date: Date): string {
 }
 
 async function loadDashboardData(): Promise<DashboardData> {
-  const list = await listAnalyses(50, 0)
+  const [list, stats] = await Promise.all([
+    listAnalyses(50, 0),
+    getOrgStats(),
+  ])
   const items = list.items
+  const activeCampaign = stats.active_campaign
 
   if (items.length === 0) {
     return {
@@ -69,6 +78,7 @@ async function loadDashboardData(): Promise<DashboardData> {
       milcoCount: 0,
       lastAnalysisLabel: 'Nenhuma',
       recentAnalyses: [],
+      activeCampaign,
     }
   }
 
@@ -113,6 +123,7 @@ async function loadDashboardData(): Promise<DashboardData> {
     milcoCount,
     lastAnalysisLabel: formatRelativeTime(newest.created_at),
     recentAnalyses,
+    activeCampaign,
   }
 }
 
@@ -120,24 +131,30 @@ function KpiCard({
   label,
   value,
   accent,
+  href,
 }: {
   label: string
   value: string | number
   accent?: boolean
+  href?: string
 }) {
+  const valueClass = [
+    'pt-1.5 font-mono text-[26px] font-bold leading-[28.6px]',
+    accent ? 'text-[color:var(--navi-milco)]' : 'text-[color:var(--navi-text)]',
+  ].join(' ')
+
   return (
     <div className="flex flex-1 flex-col border-r border-[color:var(--navi-border)] px-[22px] py-[18px] last:border-r-0">
       <p className="text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]">
         {label}
       </p>
-      <p
-        className={[
-          'pt-1.5 font-mono text-[26px] font-bold leading-[28.6px]',
-          accent ? 'text-[color:var(--navi-milco)]' : 'text-[color:var(--navi-text)]',
-        ].join(' ')}
-      >
-        {value}
-      </p>
+      {href ? (
+        <Link to={href} className={[valueClass, 'hover:underline'].join(' ')}>
+          {value}
+        </Link>
+      ) : (
+        <p className={valueClass}>{value}</p>
+      )}
     </div>
   )
 }
@@ -149,6 +166,7 @@ export function HomePage() {
     milcoCount: 0,
     lastAnalysisLabel: '—',
     recentAnalyses: [],
+    activeCampaign: null,
   })
   const [isLoading, setIsLoading] = useState(true)
 
@@ -215,7 +233,19 @@ export function HomePage() {
           label="Última análise"
           value={isLoading ? '—' : data.lastAnalysisLabel}
         />
-        <KpiCard label="Campanha ativa" value={ACTIVE_CAMPAIGN} />
+        <KpiCard
+          label="Campanha ativa"
+          value={
+            isLoading
+              ? '—'
+              : data.activeCampaign?.name ?? '—'
+          }
+          href={
+            !isLoading && data.activeCampaign?.id
+              ? `/campanhas/${data.activeCampaign.id}`
+              : undefined
+          }
+        />
       </div>
 
       <section aria-label="Análises recentes" className="mt-7">

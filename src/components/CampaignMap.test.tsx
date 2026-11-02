@@ -17,13 +17,13 @@ const leafletMocks = vi.hoisted(() => {
 })
 
 vi.mock('leaflet', async (importOriginal) => {
-  const original = await importOriginal<typeof import('leaflet')>()
+  const original = await importOriginal<Record<string, unknown>>()
+  const base = (original.default ?? original) as Record<string, unknown>
+  const leafletDefault = { ...base, heatLayer: leafletMocks.heatLayer }
   return {
     ...original,
-    default: {
-      ...original.default,
-      heatLayer: leafletMocks.heatLayer,
-    },
+    default: leafletDefault,
+    heatLayer: leafletMocks.heatLayer,
   }
 })
 
