@@ -511,11 +511,11 @@ describe('NovaAnalisePage', () => {
     expect(state.modelId).toBeUndefined()
     expect(state.campaignId).toBe('camp-1')
     expect(createAnalysis).toHaveBeenCalledWith(file, {
-      campaignId: '',
+      campaignId: 'camp-1',
       modelId: undefined,
     })
     expect(createAnalysis).not.toHaveBeenCalledWith(file, {
-      campaignId: '',
+      campaignId: 'camp-1',
       modelId: 'yolo-convnext-balanced',
     })
   })

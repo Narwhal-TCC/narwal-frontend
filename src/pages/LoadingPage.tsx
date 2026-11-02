@@ -11,6 +11,9 @@ import {
 interface LoadingLocationState {
   file?: File
   modelId?: string
+  campaignId?: string
+  latitude?: number
+  longitude?: number
 }
 
 export function LoadingPage() {
@@ -22,20 +25,24 @@ export function LoadingPage() {
     const state = location.state as LoadingLocationState | null
     const file = state?.file ?? getPendingUploadFile()
     const modelId = state?.modelId
+    const campaignId = state?.campaignId
 
-    if (!file) {
+    if (!file || !campaignId) {
       navigate('/analises/nova', { replace: true })
       return
     }
 
     let cancelled = false
 
-    // Shared promise across Strict Mode remount so POST /analyses runs once.
-    // campaignId filled in T6; placeholder keeps compile until upload forwards it.
-    createAnalysisOnce(file, createAnalysis, {
-      campaignId: '',
+    const options = {
+      campaignId,
       modelId,
-    })
+      ...(state?.latitude !== undefined ? { latitude: state.latitude } : {}),
+      ...(state?.longitude !== undefined ? { longitude: state.longitude } : {}),
+    }
+
+    // Shared promise across Strict Mode remount so POST /analyses runs once.
+    createAnalysisOnce(file, createAnalysis, options)
       .then((result) => {
         if (cancelled) return
         clearPendingUploadFile()

@@ -197,8 +197,8 @@ T8 → T9 → T10 → T11
 
 **Done when**:
 
-- [ ] Tests for spec AC 3, 4, 6, 7
-- [ ] Gate check passes: `npm test`
+- [x] Tests for spec AC 3, 4, 6, 7
+- [x] Gate check passes: `npm test`
 
 **Tests**: unit
 **Gate**: quick
