@@ -92,15 +92,9 @@ export function campaignAreaBounds(
   ]
 }
 
-/** Fit the viewport to analysis markers when present; otherwise the campaign box. */
-export function mapViewBounds(
-  campaign: Campaign,
+function boundsFromPoints(
   points: CampaignPoint[],
 ): [[number, number], [number, number]] {
-  if (points.length === 0) {
-    return campaignAreaBounds(campaign)
-  }
-
   let minLat = points[0].lat
   let maxLat = points[0].lat
   let minLon = points[0].lon
@@ -116,12 +110,43 @@ export function mapViewBounds(
 
   const latSpan = maxLat - minLat
   const lonSpan = maxLon - minLon
-  const latPad = Math.max(0.03, latSpan * 0.2 || 0.06)
-  const lonPad = Math.max(0.03, lonSpan * 0.2 || 0.06)
+  const latPad = Math.max(0.025, latSpan * 0.25 || 0.05)
+  const lonPad = Math.max(0.025, lonSpan * 0.25 || 0.05)
 
   return [
     [minLat - latPad, minLon - lonPad],
     [maxLat + latPad, maxLon + lonPad],
+  ]
+}
+
+/** Fit the viewport to markers; for compact campaign areas, include the survey box too. */
+export function mapViewBounds(
+  campaign: Campaign,
+  points: CampaignPoint[],
+): [[number, number], [number, number]] {
+  if (points.length === 0) {
+    return campaignAreaBounds(campaign)
+  }
+
+  const pointBounds = boundsFromPoints(points)
+  const area = campaignAreaBounds(campaign)
+  const areaLatSpan = area[1][0] - area[0][0]
+  const areaLonSpan = area[1][1] - area[0][1]
+  const compactArea = areaLatSpan <= 1.5 && areaLonSpan <= 1.5
+
+  if (!compactArea) {
+    return pointBounds
+  }
+
+  return [
+    [
+      Math.min(area[0][0], pointBounds[0][0]),
+      Math.min(area[0][1], pointBounds[0][1]),
+    ],
+    [
+      Math.max(area[1][0], pointBounds[1][0]),
+      Math.max(area[1][1], pointBounds[1][1]),
+    ],
   ]
 }
 

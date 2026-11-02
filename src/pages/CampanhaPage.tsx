@@ -74,7 +74,7 @@ export function CampanhaPage() {
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
       <CampaignMap campaign={data.campaign} points={data.points} />
     </div>
   )

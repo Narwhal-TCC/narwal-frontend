@@ -59,7 +59,6 @@ export interface CampaignDetectionsSidebarProps {
   onToggleSectionCollapsed: (key: ClassGroupKey) => void
   onSelectAnalysis: (analysisId: string) => void
   onHeatmapChange: (enabled: boolean) => void
-  onCollapsePanel: () => void
 }
 
 export function CampaignDetectionsSidebar({
@@ -74,28 +73,18 @@ export function CampaignDetectionsSidebar({
   onToggleSectionCollapsed,
   onSelectAnalysis,
   onHeatmapChange,
-  onCollapsePanel,
 }: CampaignDetectionsSidebarProps) {
   const groups = groupCampaignPoints(points)
 
   return (
     <aside
       data-testid="campaign-detections-sidebar"
-      className="flex w-[320px] shrink-0 flex-col border-l border-[color:var(--navi-border)] bg-[color:var(--navi-panel)]"
+      className="flex h-full max-h-full w-[280px] max-w-[280px] shrink-0 flex-col overflow-hidden border-l border-[color:var(--navi-border)] bg-[color:var(--navi-panel)]"
     >
-      <div className="flex items-center justify-between gap-2 border-b border-[color:var(--navi-border-subtle)] px-3 py-2.5">
+      <div className="border-b border-[color:var(--navi-border-subtle)] px-3 py-2.5">
         <p className="text-sm font-semibold text-[color:var(--navi-text)]">
           Detecções
         </p>
-        <button
-          type="button"
-          data-testid="campaign-panel-collapse"
-          aria-label="Recolher painel"
-          onClick={onCollapsePanel}
-          className="rounded-md px-2 py-1 text-sm text-[color:var(--navi-link)] hover:bg-[color:var(--navi-surface-tint)]"
-        >
-          ›
-        </button>
       </div>
 
       <div className="border-b border-[color:var(--navi-border-subtle)] px-3 py-2.5">

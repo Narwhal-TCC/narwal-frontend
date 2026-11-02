@@ -6,18 +6,23 @@ export function AppShell() {
   const isCampaignDetail = Boolean(useMatch({ path: '/campaigns/:id', end: true }))
 
   return (
-    <div className="flex min-h-screen bg-[color:var(--navi-bg)]">
+    <div
+      className={[
+        'flex bg-[color:var(--navi-bg)]',
+        isCampaignDetail ? 'h-screen max-h-screen overflow-hidden' : 'min-h-screen',
+      ].join(' ')}
+    >
       <Sidebar />
       <main
         className={[
-          'relative flex flex-1 flex-col',
-          isCampaignDetail ? 'min-h-0 overflow-hidden' : 'overflow-auto',
+          'relative flex min-h-0 flex-1 flex-col',
+          isCampaignDetail ? 'overflow-hidden' : 'overflow-auto',
         ].join(' ')}
       >
         <div
           className={
             isCampaignDetail
-              ? 'flex min-h-0 flex-1 flex-col'
+              ? 'flex h-full min-h-0 flex-col'
               : 'flex-1'
           }
         >

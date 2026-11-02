@@ -140,18 +140,47 @@ function MapViewSync({
 }) {
   const map = useMap()
   useEffect(() => {
+    let cancelled = false
+    let resizeTimer: ReturnType<typeof setTimeout> | undefined
+
     const fit = () => {
-      map.invalidateSize()
-      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 })
+      if (cancelled) {
+        return
+      }
+      const container = map.getContainer()
+      if (container.offsetWidth < 48 || container.offsetHeight < 48) {
+        return
+      }
+      map.invalidateSize({ animate: false })
+      map.fitBounds(bounds, {
+        paddingTopLeft: [48, 80],
+        paddingBottomRight: [48, 48],
+        maxZoom: 13,
+      })
     }
-    fit()
-    const container = map.getContainer()
-    const observer = new ResizeObserver(() => {
-      fit()
-    })
-    observer.observe(container)
+
+    const scheduleFit = () => {
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(fit)
+      })
+    }
+
+    const onResize = () => {
+      if (resizeTimer) {
+        clearTimeout(resizeTimer)
+      }
+      resizeTimer = setTimeout(scheduleFit, 150)
+    }
+
+    map.whenReady(scheduleFit)
+    window.addEventListener('resize', onResize)
+
     return () => {
-      observer.disconnect()
+      cancelled = true
+      if (resizeTimer) {
+        clearTimeout(resizeTimer)
+      }
+      window.removeEventListener('resize', onResize)
     }
   }, [map, bounds])
   return null
@@ -227,7 +256,6 @@ export interface CampaignMapProps {
 
 export function CampaignMap({ campaign, points }: CampaignMapProps) {
   const [heatmapOn, setHeatmapOn] = useState(false)
-  const [panelOpen, setPanelOpen] = useState(true)
   const [hiddenClasses, setHiddenClasses] = useState<Set<ClassGroupKey>>(
     () => new Set(),
   )
@@ -317,9 +345,9 @@ export function CampaignMap({ campaign, points }: CampaignMapProps) {
   return (
     <div
       data-testid="campaign-map-layout"
-      className="flex min-h-0 flex-1 overflow-hidden"
+      className="flex h-full min-h-0 w-full overflow-hidden"
     >
-      <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
+      <div className="relative flex h-full min-h-0 min-w-0 flex-1 flex-col">
         <div className="pointer-events-none absolute left-4 top-4 z-[1000] flex max-w-[min(100%-2rem,420px)] flex-wrap items-center gap-2">
           <h2 className="pointer-events-auto rounded-md bg-[color-mix(in_srgb,var(--navi-panel)_88%,transparent)] px-3 py-1.5 text-lg font-semibold text-[color:var(--navi-text)] shadow-sm backdrop-blur-sm">
             {campaign.name}
@@ -334,21 +362,9 @@ export function CampaignMap({ campaign, points }: CampaignMapProps) {
           ) : null}
         </div>
 
-        {!panelOpen ? (
-          <button
-            type="button"
-            data-testid="campaign-panel-expand"
-            aria-label="Expandir painel de detecções"
-            onClick={() => setPanelOpen(true)}
-            className="absolute right-3 top-1/2 z-[1000] -translate-y-1/2 rounded-l-md border border-r-0 border-[color:var(--navi-border)] bg-[color:var(--navi-panel)] px-1.5 py-3 text-sm text-[color:var(--navi-link)] shadow-sm hover:bg-[color:var(--navi-surface-tint)]"
-          >
-            ‹
-          </button>
-        ) : null}
-
         <div
           data-testid="campaign-map"
-          className="min-h-0 flex-1 overflow-hidden bg-[color:var(--navi-image-bg)]"
+          className="h-full min-h-0 flex-1 overflow-hidden bg-[color:var(--navi-image-bg)]"
         >
           <MapContainer
             center={mapCenter}
@@ -428,22 +444,19 @@ export function CampaignMap({ campaign, points }: CampaignMapProps) {
         ) : null}
       </div>
 
-      {panelOpen ? (
-        <CampaignDetectionsSidebar
-          points={points}
-          hiddenClasses={hiddenClasses}
-          hiddenAnalysisIds={hiddenAnalysisIds}
-          collapsedSections={collapsedSections}
-          selectedAnalysisId={selectedAnalysisId}
-          heatmapOn={heatmapOn}
-          onToggleClassVisibility={toggleClassVisibility}
-          onToggleAnalysisVisibility={toggleAnalysisVisibility}
-          onToggleSectionCollapsed={toggleSectionCollapsed}
-          onSelectAnalysis={handleSelectAnalysis}
-          onHeatmapChange={setHeatmapOn}
-          onCollapsePanel={() => setPanelOpen(false)}
-        />
-      ) : null}
+      <CampaignDetectionsSidebar
+        points={points}
+        hiddenClasses={hiddenClasses}
+        hiddenAnalysisIds={hiddenAnalysisIds}
+        collapsedSections={collapsedSections}
+        selectedAnalysisId={selectedAnalysisId}
+        heatmapOn={heatmapOn}
+        onToggleClassVisibility={toggleClassVisibility}
+        onToggleAnalysisVisibility={toggleAnalysisVisibility}
+        onToggleSectionCollapsed={toggleSectionCollapsed}
+        onSelectAnalysis={handleSelectAnalysis}
+        onHeatmapChange={setHeatmapOn}
+      />
     </div>
   )
 }

@@ -86,6 +86,21 @@ describe('mapViewBounds', () => {
     expect(bounds[0][1]).toBeLessThan(basePoint.lon)
     expect(bounds[1][1]).toBeGreaterThan(basePoint.lon)
   })
+
+  it('includes the campaign area when the survey box is compact', () => {
+    const compactCampaign: Campaign = {
+      ...baseCampaign,
+      area: {
+        min_lat: 38.4,
+        min_lon: -9.6,
+        max_lat: 38.8,
+        max_lon: -9.1,
+      },
+    }
+    const bounds = mapViewBounds(compactCampaign, [basePoint])
+    expect(bounds[0][0]).toBeLessThanOrEqual(compactCampaign.area.min_lat)
+    expect(bounds[1][1]).toBeGreaterThanOrEqual(compactCampaign.area.max_lon)
+  })
 })
 
 describe('formatPrimaryConfidence', () => {

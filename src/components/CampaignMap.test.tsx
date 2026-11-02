@@ -32,14 +32,6 @@ vi.mock('leaflet', async (importOriginal) => {
   }
 })
 
-vi.stubGlobal(
-  'ResizeObserver',
-  class {
-    observe() {}
-    disconnect() {}
-  },
-)
-
 vi.mock('react-leaflet', () => ({
   MapContainer: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="map-container">{children}</div>
@@ -97,7 +89,15 @@ vi.mock('react-leaflet', () => ({
     flyTo: leafletMocks.flyTo,
     getZoom: leafletMocks.getZoom,
     invalidateSize: leafletMocks.invalidateSize,
-    getContainer: () => document.createElement('div'),
+    whenReady: (callback: () => void) => {
+      callback()
+    },
+    getContainer: () => {
+      const element = document.createElement('div')
+      Object.defineProperty(element, 'offsetWidth', { value: 640 })
+      Object.defineProperty(element, 'offsetHeight', { value: 480 })
+      return element
+    },
     addLayer: leafletMocks.addLayer,
     removeLayer: leafletMocks.removeLayer,
   }),
@@ -354,15 +354,4 @@ describe('CampaignMap', () => {
     ).toHaveAttribute('data-selected', 'true')
   })
 
-  it('collapses and expands the detections panel', () => {
-    renderMap()
-
-    expect(screen.getByTestId('campaign-detections-sidebar')).toBeInTheDocument()
-    fireEvent.click(screen.getByTestId('campaign-panel-collapse'))
-    expect(
-      screen.queryByTestId('campaign-detections-sidebar'),
-    ).not.toBeInTheDocument()
-    fireEvent.click(screen.getByTestId('campaign-panel-expand'))
-    expect(screen.getByTestId('campaign-detections-sidebar')).toBeInTheDocument()
-  })
 })
