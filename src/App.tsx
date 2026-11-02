@@ -8,6 +8,7 @@ import { LoadingPage } from './pages/LoadingPage'
 import { LoginPage } from './pages/LoginPage'
 import { NovaAnalisePage } from './pages/NovaAnalisePage'
 import { CampanhaPage } from './pages/CampanhaPage'
+import { CampaignsPage } from './pages/CampaignsPage'
 import { ResultadoPage } from './pages/ResultadoPage'
 
 function PublicLoginRoute() {
@@ -32,6 +33,7 @@ export default function App() {
           <Route path="/analises/nova" element={<NovaAnalisePage />} />
           <Route path="/analises/loading" element={<LoadingPage />} />
           <Route path="/analises/:id" element={<ResultadoPage />} />
+          <Route path="/campaigns" element={<CampaignsPage />} />
           <Route path="/campaigns/:id" element={<CampanhaPage />} />
           <Route path="/campanhas/:id" element={<LegacyCampanhaRedirect />} />
           <Route path="/historico" element={<HistoricoPage />} />
