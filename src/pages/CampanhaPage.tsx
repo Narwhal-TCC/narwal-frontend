@@ -74,8 +74,8 @@ export function CampanhaPage() {
   }
 
   return (
-    <div className="px-9 py-8">
-      <p className="text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]">
+    <div className="flex min-h-[calc(100vh-260px)] flex-col px-9 py-6">
+      <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]">
         Campanha
       </p>
       <CampaignMap campaign={data.campaign} points={data.points} />

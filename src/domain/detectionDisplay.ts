@@ -7,6 +7,13 @@ export const PRIMARY_CLASS_MARKER_COLORS = {
   none: '#5a7ab0',
 } as const
 
+/** Map-only palette: MILCO stays salient; NOMBO is deliberately subdued on the chart. */
+export const MAP_MARKER_COLORS = {
+  MILCO: PRIMARY_CLASS_MARKER_COLORS.MILCO,
+  NOMBO: PRIMARY_CLASS_MARKER_COLORS.NOMBO,
+  none: PRIMARY_CLASS_MARKER_COLORS.none,
+} as const
+
 export type MapPrimaryClass = keyof typeof PRIMARY_CLASS_MARKER_COLORS
 
 export function primaryClassMarkerColor(

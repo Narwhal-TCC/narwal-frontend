@@ -2,11 +2,14 @@ import { describe, expect, it } from 'vitest'
 import type { Campaign, CampaignPoint } from '../api/campaigns'
 import {
   hasSimulatedData,
+  heatLayerPoints,
   heatWeight,
   isMarkerFilled,
+  locationSourceDescription,
   markerColor,
+  markerRadius,
 } from './campaignMap'
-import { PRIMARY_CLASS_MARKER_COLORS } from './detectionDisplay'
+import { MAP_MARKER_COLORS } from './detectionDisplay'
 
 const baseCampaign: Campaign = {
   id: 'camp-1',
@@ -29,16 +32,29 @@ const basePoint: CampaignPoint = {
 }
 
 describe('markerColor', () => {
-  it('returns MILCO red from detection display tokens', () => {
-    expect(markerColor('MILCO')).toBe(PRIMARY_CLASS_MARKER_COLORS.MILCO)
+  it('returns MILCO red from map marker tokens', () => {
+    expect(markerColor('MILCO')).toBe(MAP_MARKER_COLORS.MILCO)
   })
 
-  it('returns NOMBO amber from detection display tokens', () => {
-    expect(markerColor('NOMBO')).toBe(PRIMARY_CLASS_MARKER_COLORS.NOMBO)
+  it('returns subdued NOMBO on the map', () => {
+    expect(markerColor('NOMBO')).toBe(MAP_MARKER_COLORS.NOMBO)
   })
 
   it('returns grey when primary class is null', () => {
-    expect(markerColor(null)).toBe(PRIMARY_CLASS_MARKER_COLORS.none)
+    expect(markerColor(null)).toBe(MAP_MARKER_COLORS.none)
+  })
+})
+
+describe('markerRadius', () => {
+  it('draws MILCO larger than NOMBO', () => {
+    expect(markerRadius('MILCO')).toBeGreaterThan(markerRadius('NOMBO'))
+  })
+})
+
+describe('locationSourceDescription', () => {
+  it('describes entered and simulated sources', () => {
+    expect(locationSourceDescription('entered')).toContain('operador')
+    expect(locationSourceDescription('simulated')).toContain('simulada')
   })
 })
 
@@ -53,12 +69,29 @@ describe('isMarkerFilled', () => {
 })
 
 describe('heatWeight', () => {
-  it('uses milco count when above the floor', () => {
-    expect(heatWeight(3)).toBe(3)
+  it('scales up with milco count', () => {
+    expect(heatWeight(3)).toBeGreaterThan(heatWeight(1))
   })
 
-  it('floors weight at 0.2 for zero milco count', () => {
-    expect(heatWeight(0)).toBe(0.2)
+  it('returns a low floor for zero milco count', () => {
+    expect(heatWeight(0)).toBe(0.12)
+  })
+})
+
+describe('heatLayerPoints', () => {
+  it('prioritizes points with MILCO for the density layer', () => {
+    const points = [
+      basePoint,
+      {
+        ...basePoint,
+        analysis_id: 'n-1',
+        primary_class: 'NOMBO' as const,
+        milco_detection_count: 0,
+      },
+    ]
+    const layer = heatLayerPoints(points)
+    expect(layer).toHaveLength(1)
+    expect(layer[0][2]).toBeGreaterThan(0.12)
   })
 })
 

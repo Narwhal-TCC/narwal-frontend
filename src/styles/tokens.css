@@ -50,3 +50,37 @@ select option {
   background-color: var(--navi-panel);
   color: var(--navi-text);
 }
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: var(--navi-panel);
+  color: var(--navi-text);
+  border: 1px solid var(--navi-border);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.leaflet-popup-content {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  top: 10px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  font-size: 20px;
+  line-height: 24px;
+  color: var(--navi-muted);
+}
+
+.leaflet-container a.leaflet-popup-close-button:hover {
+  color: var(--navi-text);
+}
+
+/* Leaflet defaults link color (#0078a8) on all map anchors — overrides CTA text. */
+.leaflet-popup-content a.campaign-map-popup-cta,
+.leaflet-popup-content a.campaign-map-popup-cta:hover,
+.leaflet-popup-content a.campaign-map-popup-cta:focus {
+  color: var(--navi-button-text);
+}

@@ -3,7 +3,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Campaign, CampaignPoint } from '../api/campaigns'
-import { PRIMARY_CLASS_MARKER_COLORS } from '../domain/detectionDisplay'
+import { MAP_MARKER_COLORS } from '../domain/detectionDisplay'
 import { CampaignMap } from './CampaignMap'
 
 const leafletMocks = vi.hoisted(() => {
@@ -152,9 +152,9 @@ describe('CampaignMap', () => {
     const nomboPath = JSON.parse(markers[1].getAttribute('data-path') ?? '{}')
     const nonePath = JSON.parse(markers[2].getAttribute('data-path') ?? '{}')
 
-    expect(milcoPath.color).toBe(PRIMARY_CLASS_MARKER_COLORS.MILCO)
-    expect(nomboPath.color).toBe(PRIMARY_CLASS_MARKER_COLORS.NOMBO)
-    expect(nonePath.color).toBe(PRIMARY_CLASS_MARKER_COLORS.none)
+    expect(milcoPath.color).toBe(MAP_MARKER_COLORS.MILCO)
+    expect(nomboPath.color).toBe(MAP_MARKER_COLORS.NOMBO)
+    expect(nonePath.color).toBe(MAP_MARKER_COLORS.none)
   })
 
   it('draws entered markers filled and simulated markers hollow', () => {
@@ -211,12 +211,23 @@ describe('CampaignMap', () => {
       renderMap([enteredMilco])
 
       const popup = screen.getByTestId('map-popup')
-      expect(within(popup).getByText('MILCO')).toBeInTheDocument()
-      expect(within(popup).getByText('MILCO: 2')).toBeInTheDocument()
-      expect(within(popup).getByText('Detecções: 3')).toBeInTheDocument()
-      expect(within(popup).getByText(formattedDate)).toBeInTheDocument()
       expect(
-        within(popup).getByRole('link', { name: 'Ver análise' }),
+        within(popup).getByRole('heading', { name: 'MILCO' }),
+      ).toBeInTheDocument()
+      expect(within(popup).getByTestId('popup-location-source')).toHaveTextContent(
+        'Coordenada informada pelo operador',
+      )
+      expect(within(popup).getByTestId('popup-metric-milco')).toHaveTextContent(
+        '2',
+      )
+      expect(
+        within(popup).getByTestId('popup-metric-detections'),
+      ).toHaveTextContent('3')
+      expect(within(popup).getByTestId('popup-date')).toHaveTextContent(
+        formattedDate,
+      )
+      expect(
+        within(popup).getByRole('link', { name: /Ver Análise Completa/i }),
       ).toHaveAttribute(
         'href',
         '/analises/01234567-89ab-cdef-0123-456789abcdef',
@@ -243,9 +254,22 @@ describe('CampaignMap', () => {
     expect(screen.queryAllByTestId('map-marker')).toHaveLength(0)
   })
 
-  it('includes the detection class legend', () => {
+  it('shows simulated vs entered only in the popup', () => {
+    renderMap()
+
+    expect(screen.queryByTestId('map-marker-tooltip')).not.toBeInTheDocument()
+    const popups = screen.getAllByTestId('map-popup')
+    expect(
+      within(popups[0]).getByTestId('popup-location-source'),
+    ).toHaveTextContent('Coordenada informada pelo operador')
+    expect(
+      within(popups[1]).getByTestId('popup-location-source'),
+    ).toHaveTextContent('Posição simulada pelo sistema')
+  })
+
+  it('does not render the footer class legend on the map page', () => {
     renderMap([])
 
-    expect(screen.getByTestId('detection-class-legend')).toBeInTheDocument()
+    expect(screen.queryByTestId('detection-class-legend')).not.toBeInTheDocument()
   })
 })
