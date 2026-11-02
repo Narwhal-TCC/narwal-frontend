@@ -12,11 +12,16 @@ vi.mock('../api/analyses', () => ({
   createAnalysis: vi.fn(),
 }))
 
+vi.mock('../api/campaigns', () => ({
+  listCampaigns: vi.fn(),
+}))
+
 vi.mock('../models/useModels', () => ({
   useModels: vi.fn(),
 }))
 
 import { createAnalysis } from '../api/analyses'
+import { listCampaigns } from '../api/campaigns'
 import { useModels } from '../models/useModels'
 
 const CATALOG = [
@@ -57,6 +62,24 @@ const CATALOG = [
   },
 ]
 
+const SAMPLE_CAMPAIGN = {
+  id: 'camp-1',
+  name: 'Campanha Simulada - Costa da Prata',
+  area: { min_lat: 38.5, min_lon: -10.2, max_lat: 39.1, max_lon: -9.4 },
+  simulated: true,
+  analyses_count: 2,
+  created_at: '2026-01-01T00:00:00.000Z',
+}
+
+const OTHER_CAMPAIGN = {
+  id: 'camp-2',
+  name: 'Campanha B',
+  area: { min_lat: 40, min_lon: -11, max_lat: 41, max_lon: -10 },
+  simulated: false,
+  analyses_count: 0,
+  created_at: '2026-02-01T00:00:00.000Z',
+}
+
 function mockCatalogLoaded() {
   vi.mocked(useModels).mockReturnValue({
     models: CATALOG,
@@ -65,6 +88,22 @@ function mockCatalogLoaded() {
     error: null,
     isLoading: false,
   })
+}
+
+function mockCampaignsLoaded(campaigns: typeof SAMPLE_CAMPAIGN[] = [SAMPLE_CAMPAIGN]) {
+  vi.mocked(listCampaigns).mockResolvedValue(campaigns)
+}
+
+function NavigationStateCapture({
+  onNavigationState,
+}: {
+  onNavigationState: (state: unknown) => void
+}) {
+  const location = useLocation()
+  useEffect(() => {
+    onNavigationState(location.state)
+  }, [location.state, onNavigationState])
+  return <div>Loading Page</div>
 }
 
 function LoadingWithNavigationCapture({
@@ -98,7 +137,9 @@ function createFile(name: string, type: string, sizeBytes: number): File {
 describe('NovaAnalisePage', () => {
   beforeEach(() => {
     vi.mocked(createAnalysis).mockReset()
+    vi.mocked(listCampaigns).mockReset()
     mockCatalogLoaded()
+    mockCampaignsLoaded()
   })
 
   it('rejects a non-image file type', async () => {
@@ -127,30 +168,187 @@ describe('NovaAnalisePage', () => {
     expect(createAnalysis).not.toHaveBeenCalled()
   })
 
-  it('renders editable collection metadata fields', () => {
+  it('lists campaigns from the API and preselects when exactly one exists', async () => {
     renderNova()
 
-    fireEvent.click(screen.getByText('Informações adicionais'))
+    await waitFor(() => {
+      expect(listCampaigns).toHaveBeenCalled()
+    })
 
-    const coordinates = screen.getByLabelText('Coordenadas')
-    const collectedAt = screen.getByLabelText('Data e hora da coleta')
-    const campaign = screen.getByLabelText('Campanha')
+    const select = screen.getByLabelText('Campanha') as HTMLSelectElement
+    expect(select).toHaveValue('camp-1')
+    expect(select).toHaveTextContent('Campanha Simulada - Costa da Prata')
+  })
 
-    expect(coordinates).toHaveValue('')
-    expect(collectedAt).toHaveAttribute('type', 'datetime-local')
-    expect(collectedAt).toHaveValue('')
-    expect(campaign).toHaveValue('')
+  it('does not preselect when multiple campaigns exist', async () => {
+    mockCampaignsLoaded([SAMPLE_CAMPAIGN, OTHER_CAMPAIGN])
+    renderNova()
 
-    fireEvent.change(coordinates, { target: { value: "24°00'S 44°00'W" } })
-    fireEvent.change(campaign, { target: { value: 'Campanha teste' } })
+    await waitFor(() => {
+      expect(screen.getByLabelText('Campanha')).toBeInTheDocument()
+    })
 
-    expect(coordinates).toHaveValue("24°00'S 44°00'W")
-    expect(campaign).toHaveValue('Campanha teste')
+    const select = screen.getByLabelText('Campanha') as HTMLSelectElement
+    expect(select).toHaveValue('')
+  })
+
+  it('disables submit and shows message when org has no campaigns', async () => {
+    mockCampaignsLoaded([])
+    renderNova()
+
+    expect(await screen.findByText('Nenhuma campanha cadastrada')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Iniciar análise' })).toBeDisabled()
+  })
+
+  it('disables submit and shows error when campaign list fails', async () => {
+    vi.mocked(listCampaigns).mockRejectedValue(
+      new ApiError('UNKNOWN_ERROR', 'Falha ao carregar campanhas.', 500),
+    )
+    renderNova()
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Falha ao carregar campanhas.',
+    )
+    expect(screen.getByRole('button', { name: 'Iniciar análise' })).toBeDisabled()
+  })
+
+  it('blocks submit when only latitude is filled', async () => {
+    renderNova()
+    await waitFor(() => {
+      expect(screen.getByLabelText('Campanha')).toHaveValue('camp-1')
+    })
+
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement
+    fireEvent.change(input, {
+      target: { files: [createFile('sonar.png', 'image/png', 1024)] },
+    })
+
+    fireEvent.change(screen.getByLabelText('Latitude'), { target: { value: '38.7' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Iniciar análise' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Informe latitude e longitude juntas',
+    )
+    expect(screen.queryByText('Loading Page')).not.toBeInTheDocument()
+  })
+
+  it('blocks submit when coordinates are non-numeric', async () => {
+    renderNova()
+    await waitFor(() => {
+      expect(screen.getByLabelText('Campanha')).toHaveValue('camp-1')
+    })
+
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement
+    fireEvent.change(input, {
+      target: { files: [createFile('sonar.png', 'image/png', 1024)] },
+    })
+
+    fireEvent.change(screen.getByLabelText('Latitude'), { target: { value: 'abc' } })
+    fireEvent.change(screen.getByLabelText('Longitude'), { target: { value: '10' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Iniciar análise' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Coordenadas inválidas')
+  })
+
+  it('navigates with campaign only when lat and lon are empty', async () => {
+    let navigationState: unknown
+    render(
+      <MemoryRouter initialEntries={['/analises/nova']}>
+        <Routes>
+          <Route path="/analises/nova" element={<NovaAnalisePage />} />
+          <Route
+            path="/analises/loading"
+            element={
+              <NavigationStateCapture
+                onNavigationState={(state) => {
+                  navigationState = state
+                }}
+              />
+            }
+          />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Campanha')).toHaveValue('camp-1')
+    })
+
+    const file = createFile('sonar.png', 'image/png', 1024)
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement
+    fireEvent.change(input, { target: { files: [file] } })
+    fireEvent.click(screen.getByRole('button', { name: 'Iniciar análise' }))
+
+    await waitFor(() => {
+      expect(navigationState).toBeDefined()
+    })
+
+    const state = navigationState as {
+      file?: File
+      modelId?: string
+      campaignId?: string
+      latitude?: number
+      longitude?: number
+    }
+    expect(state.file).toBe(file)
+    expect(state.campaignId).toBe('camp-1')
+    expect(state.modelId).toBe('yolo-convnext-balanced')
+    expect(state.latitude).toBeUndefined()
+    expect(state.longitude).toBeUndefined()
+  })
+
+  it('navigates with campaign and position when both lat and lon are filled', async () => {
+    let navigationState: unknown
+    render(
+      <MemoryRouter initialEntries={['/analises/nova']}>
+        <Routes>
+          <Route path="/analises/nova" element={<NovaAnalisePage />} />
+          <Route
+            path="/analises/loading"
+            element={
+              <NavigationStateCapture
+                onNavigationState={(state) => {
+                  navigationState = state
+                }}
+              />
+            }
+          />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Campanha')).toHaveValue('camp-1')
+    })
+
+    const file = createFile('sonar.png', 'image/png', 1024)
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement
+    fireEvent.change(input, { target: { files: [file] } })
+    fireEvent.change(screen.getByLabelText('Latitude'), { target: { value: '38.76543' } })
+    fireEvent.change(screen.getByLabelText('Longitude'), { target: { value: '-9.87654' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Iniciar análise' }))
+
+    await waitFor(() => {
+      expect(navigationState).toBeDefined()
+    })
+
+    const state = navigationState as {
+      campaignId?: string
+      latitude?: number
+      longitude?: number
+    }
+    expect(state.campaignId).toBe('camp-1')
+    expect(state.latitude).toBe(38.76543)
+    expect(state.longitude).toBe(-9.87654)
   })
 
   it('accepts a valid PNG and navigates to loading', async () => {
     renderNova()
     const input = document.querySelector('input[type="file"]') as HTMLInputElement
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Campanha')).toHaveValue('camp-1')
+    })
 
     fireEvent.change(input, {
       target: { files: [createFile('sonar.png', 'image/png', 1024)] },
@@ -292,6 +490,10 @@ describe('NovaAnalisePage', () => {
       </MemoryRouter>,
     )
 
+    await waitFor(() => {
+      expect(screen.getByLabelText('Campanha')).toHaveValue('camp-1')
+    })
+
     const input = document.querySelector('input[type="file"]') as HTMLInputElement
     fireEvent.change(input, { target: { files: [file] } })
     fireEvent.click(screen.getByRole('button', { name: 'Iniciar análise' }))
@@ -300,9 +502,14 @@ describe('NovaAnalisePage', () => {
       expect(createAnalysis).toHaveBeenCalledTimes(1)
     })
 
-    const state = navigationState as { file?: File; modelId?: string }
+    const state = navigationState as {
+      file?: File
+      modelId?: string
+      campaignId?: string
+    }
     expect(state.file).toBe(file)
     expect(state.modelId).toBeUndefined()
+    expect(state.campaignId).toBe('camp-1')
     expect(createAnalysis).toHaveBeenCalledWith(file, {
       campaignId: '',
       modelId: undefined,

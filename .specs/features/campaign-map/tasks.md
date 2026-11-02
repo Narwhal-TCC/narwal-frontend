@@ -173,8 +173,8 @@ T8 → T9 → T10 → T11
 
 **Done when**:
 
-- [ ] Tests for spec "Upload with campaign" AC 1, 2, 5 and edge cases (list failure, non-numeric)
-- [ ] Gate check passes: `npm test`
+- [x] Tests for spec "Upload with campaign" AC 1, 2, 5 and edge cases (list failure, non-numeric)
+- [x] Gate check passes: `npm test`
 
 **Tests**: unit
 **Gate**: quick

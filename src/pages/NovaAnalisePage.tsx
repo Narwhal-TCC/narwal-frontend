@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import type { DragEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { icoUploadDrop } from '../assets'
+import { listCampaigns, type Campaign } from '../api/campaigns'
+import { ApiError } from '../api/client'
 import { validateUploadFile } from '../domain/uploadValidation'
 import { useModels } from '../models/useModels'
 import { ModelConfusionMatrix } from '../components/ModelConfusionMatrix'
@@ -18,6 +20,14 @@ const COLLECTION_FIELD_CLASS = `${FIELD_CLASS} font-mono`
 
 const SELECT_CLASS = `${FIELD_CLASS} cursor-pointer`
 
+function parseOptionalCoordinate(raw: string): number | null {
+  const trimmed = raw.trim()
+  if (!trimmed) return null
+  const value = Number(trimmed)
+  if (!Number.isFinite(value)) return null
+  return value
+}
+
 export function NovaAnalisePage() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -26,9 +36,13 @@ export function NovaAnalisePage() {
   const [error, setError] = useState<string | null>(
     (location.state as { error?: string } | null)?.error ?? null,
   )
-  const [coordinates, setCoordinates] = useState('')
+  const [latitudeInput, setLatitudeInput] = useState('')
+  const [longitudeInput, setLongitudeInput] = useState('')
   const [collectedAt, setCollectedAt] = useState('')
-  const [campaign, setCampaign] = useState('')
+  const [campaigns, setCampaigns] = useState<Campaign[]>([])
+  const [campaignsLoading, setCampaignsLoading] = useState(true)
+  const [campaignsError, setCampaignsError] = useState<string | null>(null)
+  const [selectedCampaignId, setSelectedCampaignId] = useState('')
   const { models, defaultId, error: modelsError } = useModels()
   const [selectedModelId, setSelectedModelId] = useState<string>('')
 
@@ -38,7 +52,41 @@ export function NovaAnalisePage() {
     }
   }, [defaultId])
 
+  useEffect(() => {
+    let cancelled = false
+    setCampaignsLoading(true)
+    setCampaignsError(null)
+
+    listCampaigns()
+      .then((list) => {
+        if (cancelled) return
+        setCampaigns(list)
+        if (list.length === 1) {
+          setSelectedCampaignId(list[0].id)
+        }
+      })
+      .catch((err) => {
+        if (cancelled) return
+        setCampaigns([])
+        const message =
+          err instanceof ApiError
+            ? err.message
+            : 'Não foi possível carregar as campanhas.'
+        setCampaignsError(message)
+      })
+      .finally(() => {
+        if (!cancelled) setCampaignsLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   const catalogFailed = modelsError !== null
+  const noCampaigns = !campaignsLoading && campaigns.length === 0 && !campaignsError
+  const submitBlocked =
+    campaignsLoading || noCampaigns || campaignsError !== null
   const selectedModel = models.find((m) => m.id === selectedModelId)
   const selectedBenchmark = selectedModelId
     ? benchmarkForModel(selectedModelId)
@@ -71,15 +119,49 @@ export function NovaAnalisePage() {
   }
 
   const onSubmit = () => {
+    if (submitBlocked) return
     if (!selectedFile) {
       setError('Selecione uma imagem para continuar.')
       return
     }
+    if (!selectedCampaignId) {
+      setError('Selecione uma campanha para continuar.')
+      return
+    }
+
+    const latRaw = latitudeInput.trim()
+    const lonRaw = longitudeInput.trim()
+    const hasLat = latRaw.length > 0
+    const hasLon = lonRaw.length > 0
+
+    if (hasLat !== hasLon) {
+      setError('Informe latitude e longitude juntas')
+      return
+    }
+
+    let latitude: number | undefined
+    let longitude: number | undefined
+
+    if (hasLat && hasLon) {
+      const lat = parseOptionalCoordinate(latitudeInput)
+      const lon = parseOptionalCoordinate(longitudeInput)
+      if (lat === null || lon === null) {
+        setError('Coordenadas inválidas')
+        return
+      }
+      latitude = lat
+      longitude = lon
+    }
+
+    setError(null)
     setPendingUploadFile(selectedFile)
     navigate('/analises/loading', {
       state: {
         file: selectedFile,
         modelId: catalogFailed ? undefined : selectedModelId || undefined,
+        campaignId: selectedCampaignId,
+        latitude,
+        longitude,
       },
     })
   }
@@ -187,6 +269,87 @@ export function NovaAnalisePage() {
             </div>
           </div>
 
+          <div className="rounded-[10px] border border-[color:var(--navi-border-subtle)] bg-[color:var(--navi-panel)] p-5">
+            <p className="text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]">
+              Campanha e posição
+            </p>
+            <div className="mt-4 space-y-3.5">
+              <div>
+                <label
+                  htmlFor="analysis-campaign"
+                  className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]"
+                >
+                  Campanha
+                </label>
+                <select
+                  id="analysis-campaign"
+                  disabled={submitBlocked}
+                  value={selectedCampaignId}
+                  onChange={(event) => setSelectedCampaignId(event.target.value)}
+                  className={SELECT_CLASS}
+                >
+                  {!campaignsLoading && campaigns.length !== 1 ? (
+                    <option value="">Selecione uma campanha</option>
+                  ) : null}
+                  {campaigns.map((campaign) => (
+                    <option key={campaign.id} value={campaign.id}>
+                      {campaign.name}
+                    </option>
+                  ))}
+                </select>
+                {noCampaigns ? (
+                  <p className="pt-2 text-[13px] text-[color:var(--navi-muted)]">
+                    Nenhuma campanha cadastrada
+                  </p>
+                ) : null}
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label
+                    htmlFor="analysis-latitude"
+                    className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]"
+                  >
+                    Latitude
+                  </label>
+                  <input
+                    id="analysis-latitude"
+                    type="text"
+                    inputMode="decimal"
+                    value={latitudeInput}
+                    onChange={(event) => setLatitudeInput(event.target.value)}
+                    placeholder="Opcional"
+                    autoComplete="off"
+                    disabled={submitBlocked}
+                    className={COLLECTION_FIELD_CLASS}
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="analysis-longitude"
+                    className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]"
+                  >
+                    Longitude
+                  </label>
+                  <input
+                    id="analysis-longitude"
+                    type="text"
+                    inputMode="decimal"
+                    value={longitudeInput}
+                    onChange={(event) => setLongitudeInput(event.target.value)}
+                    placeholder="Opcional"
+                    autoComplete="off"
+                    disabled={submitBlocked}
+                    className={COLLECTION_FIELD_CLASS}
+                  />
+                </div>
+              </div>
+              <p className="text-[12px] leading-[18px] text-[color:var(--navi-muted)]">
+                Deixe em branco para posicionar a análise automaticamente dentro da área da
+                campanha.
+              </p>
+            </div>
+          </div>
+
           <details className="rounded-[10px] border border-[color:var(--navi-border-subtle)] bg-[color:var(--navi-panel)] p-5 [&_summary::-webkit-details-marker]:hidden">
             <summary className="cursor-pointer list-none text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]">
               Informações adicionais
@@ -194,27 +357,7 @@ export function NovaAnalisePage() {
                 (opcional)
               </span>
             </summary>
-            <p className="pt-3 text-[12px] leading-[18px] text-[color:var(--navi-muted)]">
-              Coordenadas, data e campanha ainda não são enviadas na análise.
-            </p>
             <div className="mt-4 space-y-3.5">
-              <div>
-                <label
-                  htmlFor="collection-coordinates"
-                  className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]"
-                >
-                  Coordenadas
-                </label>
-                <input
-                  id="collection-coordinates"
-                  type="text"
-                  value={coordinates}
-                  onChange={(event) => setCoordinates(event.target.value)}
-                  placeholder="Ex.: 23°58'S 43°10'W"
-                  autoComplete="off"
-                  className={COLLECTION_FIELD_CLASS}
-                />
-              </div>
               <div>
                 <label
                   htmlFor="collection-datetime"
@@ -230,25 +373,14 @@ export function NovaAnalisePage() {
                   className={COLLECTION_FIELD_CLASS}
                 />
               </div>
-              <div>
-                <label
-                  htmlFor="collection-campaign"
-                  className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]"
-                >
-                  Campanha
-                </label>
-                <input
-                  id="collection-campaign"
-                  type="text"
-                  value={campaign}
-                  onChange={(event) => setCampaign(event.target.value)}
-                  placeholder="Nome da campanha"
-                  autoComplete="off"
-                  className={COLLECTION_FIELD_CLASS}
-                />
-              </div>
             </div>
           </details>
+
+          {campaignsError ? (
+            <p role="alert" className="text-[13px] text-[color:var(--navi-milco)]">
+              {campaignsError}
+            </p>
+          ) : null}
 
           {error ? (
             <p role="alert" className="text-[13px] text-[color:var(--navi-milco)]">
@@ -259,7 +391,8 @@ export function NovaAnalisePage() {
           <button
             type="button"
             onClick={onSubmit}
-            className="w-full rounded-md bg-[var(--navi-accent)] px-5 py-2.5 text-sm font-semibold text-[color:var(--navi-button-text)]"
+            disabled={submitBlocked}
+            className="w-full rounded-md bg-[var(--navi-accent)] px-5 py-2.5 text-sm font-semibold text-[color:var(--navi-button-text)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             Iniciar análise
           </button>
