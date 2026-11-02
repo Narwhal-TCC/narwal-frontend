@@ -245,8 +245,8 @@ T8 → T9 → T10 → T11
 
 **Done when**:
 
-- [ ] One test per branch (MILCO, NOMBO, null; entered, simulated; weight floor)
-- [ ] Gate check passes: `npm test`
+- [x] One test per branch (MILCO, NOMBO, null; entered, simulated; weight floor)
+- [x] Gate check passes: `npm test`
 
 **Tests**: unit
 **Gate**: quick

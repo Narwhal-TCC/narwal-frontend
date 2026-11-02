@@ -1,5 +1,26 @@
 import { classifyDetection, type Detection } from './classification'
 
+/** Hex colours aligned with --navi-milco, --navi-nombo and muted grey for map markers. */
+export const PRIMARY_CLASS_MARKER_COLORS = {
+  MILCO: '#e8836a',
+  NOMBO: '#6f9ceb',
+  none: '#5a7ab0',
+} as const
+
+export type MapPrimaryClass = keyof typeof PRIMARY_CLASS_MARKER_COLORS
+
+export function primaryClassMarkerColor(
+  primaryClass: 'MILCO' | 'NOMBO' | null,
+): string {
+  if (primaryClass === 'MILCO') {
+    return PRIMARY_CLASS_MARKER_COLORS.MILCO
+  }
+  if (primaryClass === 'NOMBO') {
+    return PRIMARY_CLASS_MARKER_COLORS.NOMBO
+  }
+  return PRIMARY_CLASS_MARKER_COLORS.none
+}
+
 export function formatDetectionHeading(
   index: number,
   detection?: Detection | null,
