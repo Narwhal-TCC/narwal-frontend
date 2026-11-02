@@ -1,4 +1,10 @@
-import { useEffect, useState } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MutableRefObject,
+} from 'react'
 import { Link } from 'react-router-dom'
 import L from 'leaflet'
 import 'leaflet.heat'
@@ -12,6 +18,7 @@ import {
 } from 'react-leaflet'
 import type { Campaign, CampaignPoint } from '../api/campaigns'
 import { icoArrowRight, icoClock, icoMapPin } from '../assets'
+import { CampaignDetectionsSidebar } from './CampaignDetectionsSidebar'
 import {
   campaignAreaBounds,
   hasSimulatedData,
@@ -21,6 +28,11 @@ import {
   markerRadius,
   milcoHeatGradient,
 } from '../domain/campaignMap'
+import {
+  classGroupKey,
+  filterVisibleCampaignPoints,
+  type ClassGroupKey,
+} from '../domain/campaignPointGroups'
 
 function formatPointDate(iso: string): string {
   return new Intl.DateTimeFormat('pt-BR', {
@@ -132,6 +144,34 @@ function FitBounds({
   return null
 }
 
+function FlyToSelected({
+  selectedAnalysisId,
+  points,
+  markerRefs,
+}: {
+  selectedAnalysisId: string | null
+  points: CampaignPoint[]
+  markerRefs: MutableRefObject<Record<string, L.CircleMarker | null>>
+}) {
+  const map = useMap()
+
+  useEffect(() => {
+    if (!selectedAnalysisId) {
+      return
+    }
+    const point = points.find((p) => p.analysis_id === selectedAnalysisId)
+    if (!point) {
+      return
+    }
+    const targetZoom = Math.max(map.getZoom(), 14)
+    map.flyTo([point.lat, point.lon], targetZoom, { duration: 0.4 })
+    const layer = markerRefs.current[selectedAnalysisId]
+    layer?.openPopup()
+  }, [selectedAnalysisId, points, map, markerRefs])
+
+  return null
+}
+
 function HeatLayer({
   points,
   enabled,
@@ -174,90 +214,205 @@ export interface CampaignMapProps {
 
 export function CampaignMap({ campaign, points }: CampaignMapProps) {
   const [heatmapOn, setHeatmapOn] = useState(false)
+  const [panelOpen, setPanelOpen] = useState(true)
+  const [hiddenClasses, setHiddenClasses] = useState<Set<ClassGroupKey>>(
+    () => new Set(),
+  )
+  const [hiddenAnalysisIds, setHiddenAnalysisIds] = useState<Set<string>>(
+    () => new Set(),
+  )
+  const [collapsedSections, setCollapsedSections] = useState<
+    Set<ClassGroupKey>
+  >(() => new Set())
+  const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(
+    null,
+  )
+  const markerRefs = useRef<Record<string, L.CircleMarker | null>>({})
+
   const bounds = campaignAreaBounds(campaign)
   const showSimulatedBadge = hasSimulatedData(campaign, points)
 
+  const visiblePoints = useMemo(
+    () => filterVisibleCampaignPoints(points, hiddenClasses, hiddenAnalysisIds),
+    [points, hiddenClasses, hiddenAnalysisIds],
+  )
+
+  const toggleClassVisibility = (key: ClassGroupKey) => {
+    setHiddenClasses((prev) => {
+      const next = new Set(prev)
+      if (next.has(key)) {
+        next.delete(key)
+      } else {
+        next.add(key)
+      }
+      return next
+    })
+  }
+
+  const toggleAnalysisVisibility = (analysisId: string) => {
+    setHiddenAnalysisIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(analysisId)) {
+        next.delete(analysisId)
+      } else {
+        next.add(analysisId)
+        if (selectedAnalysisId === analysisId) {
+          setSelectedAnalysisId(null)
+        }
+      }
+      return next
+    })
+  }
+
+  const toggleSectionCollapsed = (key: ClassGroupKey) => {
+    setCollapsedSections((prev) => {
+      const next = new Set(prev)
+      if (next.has(key)) {
+        next.delete(key)
+      } else {
+        next.add(key)
+      }
+      return next
+    })
+  }
+
+  const handleSelectAnalysis = (analysisId: string) => {
+    if (hiddenAnalysisIds.has(analysisId)) {
+      return
+    }
+    const point = points.find((p) => p.analysis_id === analysisId)
+    if (!point) {
+      return
+    }
+    if (hiddenClasses.has(classGroupKey(point.primary_class))) {
+      return
+    }
+    setSelectedAnalysisId(analysisId)
+  }
+
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-xl font-semibold text-[color:var(--navi-text)]">
-          {campaign.name}
-        </h2>
-        {showSimulatedBadge ? (
-          <span
-            data-testid="simulated-location-badge"
-            className="rounded px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide bg-[color-mix(in_srgb,var(--navi-nombo)_18%,transparent)] text-[color:var(--navi-link)]"
+    <div
+      data-testid="campaign-map-layout"
+      className="flex min-h-0 flex-1 overflow-hidden"
+    >
+      <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="pointer-events-none absolute left-4 top-4 z-[1000] flex max-w-[min(100%-2rem,420px)] flex-wrap items-center gap-2">
+          <h2 className="pointer-events-auto rounded-md bg-[color-mix(in_srgb,var(--navi-panel)_88%,transparent)] px-3 py-1.5 text-lg font-semibold text-[color:var(--navi-text)] shadow-sm backdrop-blur-sm">
+            {campaign.name}
+          </h2>
+          {showSimulatedBadge ? (
+            <span
+              data-testid="simulated-location-badge"
+              className="pointer-events-auto rounded px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide bg-[color-mix(in_srgb,var(--navi-nombo)_18%,transparent)] text-[color:var(--navi-link)] backdrop-blur-sm"
+            >
+              Dados de localização simulados
+            </span>
+          ) : null}
+        </div>
+
+        {!panelOpen ? (
+          <button
+            type="button"
+            data-testid="campaign-panel-expand"
+            aria-label="Expandir painel de detecções"
+            onClick={() => setPanelOpen(true)}
+            className="absolute right-3 top-1/2 z-[1000] -translate-y-1/2 rounded-l-md border border-r-0 border-[color:var(--navi-border)] bg-[color:var(--navi-panel)] px-1.5 py-3 text-sm text-[color:var(--navi-link)] shadow-sm hover:bg-[color:var(--navi-surface-tint)]"
           >
-            Dados de localização simulados
-          </span>
+            ‹
+          </button>
+        ) : null}
+
+        <div
+          data-testid="campaign-map"
+          className="min-h-0 flex-1 overflow-hidden bg-[color:var(--navi-image-bg)]"
+        >
+          <MapContainer
+            bounds={bounds}
+            className="h-full w-full"
+            style={{ height: '100%', width: '100%', minHeight: 0 }}
+            scrollWheelZoom
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <FitBounds bounds={bounds} />
+            <FlyToSelected
+              selectedAnalysisId={selectedAnalysisId}
+              points={visiblePoints}
+              markerRefs={markerRefs}
+            />
+            <Rectangle
+              bounds={bounds}
+              pathOptions={{
+                color: 'var(--navi-accent)',
+                weight: 2,
+                fillOpacity: 0.06,
+              }}
+            />
+            {visiblePoints.map((point) => {
+              const selected = selectedAnalysisId === point.analysis_id
+              const baseRadius = markerRadius(point.primary_class)
+              return (
+                <CircleMarker
+                  key={point.analysis_id}
+                  ref={(layer) => {
+                    markerRefs.current[point.analysis_id] = layer
+                  }}
+                  center={[point.lat, point.lon]}
+                  radius={selected ? baseRadius + 4 : baseRadius}
+                  pathOptions={{
+                    ...markerPathOptions(
+                      point.primary_class,
+                      point.location_source,
+                    ),
+                    weight: selected
+                      ? 4
+                      : markerPathOptions(
+                          point.primary_class,
+                          point.location_source,
+                        ).weight,
+                  }}
+                  eventHandlers={{
+                    click: () => setSelectedAnalysisId(point.analysis_id),
+                  }}
+                >
+                  <Popup>
+                    <CampaignMapPopup point={point} />
+                  </Popup>
+                </CircleMarker>
+              )
+            })}
+            <HeatLayer points={visiblePoints} enabled={heatmapOn} />
+          </MapContainer>
+        </div>
+
+        {points.length === 0 ? (
+          <p
+            data-testid="campaign-map-empty"
+            className="absolute bottom-4 left-4 z-[1000] rounded-md bg-[color-mix(in_srgb,var(--navi-panel)_90%,transparent)] px-3 py-2 text-sm text-[color:var(--navi-muted)] backdrop-blur-sm"
+            role="status"
+          >
+            Nenhuma análise nesta campanha
+          </p>
         ) : null}
       </div>
 
-      <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-[color:var(--navi-link)]">
-        <input
-          type="checkbox"
-          checked={heatmapOn}
-          onChange={(event) => setHeatmapOn(event.target.checked)}
-          data-testid="heatmap-toggle"
+      {panelOpen ? (
+        <CampaignDetectionsSidebar
+          points={points}
+          hiddenClasses={hiddenClasses}
+          hiddenAnalysisIds={hiddenAnalysisIds}
+          collapsedSections={collapsedSections}
+          selectedAnalysisId={selectedAnalysisId}
+          heatmapOn={heatmapOn}
+          onToggleClassVisibility={toggleClassVisibility}
+          onToggleAnalysisVisibility={toggleAnalysisVisibility}
+          onToggleSectionCollapsed={toggleSectionCollapsed}
+          onSelectAnalysis={handleSelectAnalysis}
+          onHeatmapChange={setHeatmapOn}
+          onCollapsePanel={() => setPanelOpen(false)}
         />
-        Mapa de densidade
-      </label>
-
-      <div
-        data-testid="campaign-map"
-        className="min-h-[480px] flex-1 overflow-hidden rounded-[10px] border border-[color:var(--navi-border)]"
-      >
-        <MapContainer
-          bounds={bounds}
-          className="h-full w-full"
-          style={{
-            height: 'calc(100vh - 14rem)',
-            minHeight: '480px',
-            width: '100%',
-            background: 'var(--navi-image-bg)',
-          }}
-          scrollWheelZoom
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <FitBounds bounds={bounds} />
-          <Rectangle
-            bounds={bounds}
-            pathOptions={{
-              color: 'var(--navi-accent)',
-              weight: 2,
-              fillOpacity: 0.06,
-            }}
-          />
-          {points.map((point) => (
-            <CircleMarker
-              key={point.analysis_id}
-              center={[point.lat, point.lon]}
-              radius={markerRadius(point.primary_class)}
-              pathOptions={markerPathOptions(
-                point.primary_class,
-                point.location_source,
-              )}
-            >
-              <Popup>
-                <CampaignMapPopup point={point} />
-              </Popup>
-            </CircleMarker>
-          ))}
-          <HeatLayer points={points} enabled={heatmapOn} />
-        </MapContainer>
-      </div>
-
-      {points.length === 0 ? (
-        <p
-          data-testid="campaign-map-empty"
-          className="text-sm text-[color:var(--navi-muted)]"
-          role="status"
-        >
-          Nenhuma análise nesta campanha
-        </p>
       ) : null}
     </div>
   )

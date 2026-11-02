@@ -28,4 +28,20 @@ describe('AppShell', () => {
     expect(waveWrapper!.className).toContain('h-[260px]')
     expect(waveWrapper!.className).not.toContain('opacity-')
   })
+
+  it('hides the wave footer on campaign detail routes', () => {
+    render(
+      <MemoryRouter initialEntries={['/campaigns/camp-1']}>
+        <Routes>
+          <Route element={<AppShell />}>
+            <Route path="/campaigns/:id" element={<div>Campaign</div>} />
+          </Route>
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    expect(
+      screen.getByRole('main').querySelector('[aria-hidden="true"]'),
+    ).toBeNull()
+  })
 })

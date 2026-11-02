@@ -11,9 +11,12 @@ const leafletMocks = vi.hoisted(() => {
   const heatLayer = vi.fn(() => ({ addTo: addLayer }))
   return {
     fitBounds: vi.fn(),
+    flyTo: vi.fn(),
+    getZoom: vi.fn(() => 10),
     addLayer,
     removeLayer: vi.fn(),
     heatLayer,
+    openPopup: vi.fn(),
   }
 })
 
@@ -48,24 +51,41 @@ vi.mock('react-leaflet', () => ({
     center,
     pathOptions,
     children,
+    eventHandlers,
+    ref: markerRef,
+    radius,
   }: {
     center: [number, number]
     pathOptions: Record<string, unknown>
     children?: React.ReactNode
-  }) => (
-    <div
-      data-testid="map-marker"
-      data-center={JSON.stringify(center)}
-      data-path={JSON.stringify(pathOptions)}
-    >
-      {children}
-    </div>
-  ),
+    eventHandlers?: { click?: () => void }
+    ref?: (layer: { openPopup: () => void } | null) => void
+    radius?: number
+  }) => {
+    useEffect(() => {
+      if (typeof markerRef === 'function') {
+        markerRef({ openPopup: leafletMocks.openPopup })
+      }
+    }, [markerRef])
+    return (
+      <div
+        data-testid="map-marker"
+        data-center={JSON.stringify(center)}
+        data-path={JSON.stringify(pathOptions)}
+        data-radius={radius}
+        onClick={() => eventHandlers?.click?.()}
+      >
+        {children}
+      </div>
+    )
+  },
   Popup: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="map-popup">{children}</div>
   ),
   useMap: () => ({
     fitBounds: leafletMocks.fitBounds,
+    flyTo: leafletMocks.flyTo,
+    getZoom: leafletMocks.getZoom,
     addLayer: leafletMocks.addLayer,
     removeLayer: leafletMocks.removeLayer,
   }),
@@ -122,6 +142,8 @@ describe('CampaignMap', () => {
     leafletMocks.addLayer.mockClear()
     leafletMocks.removeLayer.mockClear()
     leafletMocks.fitBounds.mockClear()
+    leafletMocks.flyTo.mockClear()
+    leafletMocks.openPopup.mockClear()
   })
 
   it('draws the campaign area and one marker per point', () => {
@@ -271,5 +293,54 @@ describe('CampaignMap', () => {
     renderMap([])
 
     expect(screen.queryByTestId('detection-class-legend')).not.toBeInTheDocument()
+  })
+
+  it('renders grouped detections in the right sidebar', () => {
+    renderMap()
+
+    expect(screen.getByTestId('campaign-detections-sidebar')).toBeInTheDocument()
+    expect(screen.getByTestId('class-group-MILCO')).toBeInTheDocument()
+    expect(screen.getByTestId('class-group-NOMBO')).toBeInTheDocument()
+  })
+
+  it('hides markers when a class visibility toggle is off', () => {
+    renderMap()
+
+    fireEvent.click(screen.getByTestId('class-visibility-MILCO'))
+    expect(screen.getAllByTestId('map-marker')).toHaveLength(1)
+    const center = JSON.parse(
+      screen.getByTestId('map-marker').getAttribute('data-center') ?? '[]',
+    )
+    expect(center).toEqual([simulatedNombo.lat, simulatedNombo.lon])
+  })
+
+  it('flies to a point when a visible row is selected', () => {
+    renderMap()
+
+    fireEvent.click(
+      screen.getByTestId(`detection-row-${enteredMilco.analysis_id}`),
+    )
+
+    expect(leafletMocks.flyTo).toHaveBeenCalledWith(
+      [enteredMilco.lat, enteredMilco.lon],
+      14,
+      { duration: 0.4 },
+    )
+    expect(leafletMocks.openPopup).toHaveBeenCalled()
+    expect(
+      screen.getByTestId(`detection-row-${enteredMilco.analysis_id}`),
+    ).toHaveAttribute('data-selected', 'true')
+  })
+
+  it('collapses and expands the detections panel', () => {
+    renderMap()
+
+    expect(screen.getByTestId('campaign-detections-sidebar')).toBeInTheDocument()
+    fireEvent.click(screen.getByTestId('campaign-panel-collapse'))
+    expect(
+      screen.queryByTestId('campaign-detections-sidebar'),
+    ).not.toBeInTheDocument()
+    fireEvent.click(screen.getByTestId('campaign-panel-expand'))
+    expect(screen.getByTestId('campaign-detections-sidebar')).toBeInTheDocument()
   })
 })
