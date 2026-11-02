@@ -293,8 +293,8 @@ T8 → T9 → T10 → T11
 
 **Done when**:
 
-- [ ] Tests for AC 8 and successful load
-- [ ] Gate check passes: `npm test`
+- [x] Tests for AC 8 and successful load
+- [x] Gate check passes: `npm test`
 
 **Tests**: unit
 **Gate**: quick

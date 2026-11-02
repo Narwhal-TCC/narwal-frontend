@@ -7,6 +7,7 @@ import { HomePage } from './pages/HomePage'
 import { LoadingPage } from './pages/LoadingPage'
 import { LoginPage } from './pages/LoginPage'
 import { NovaAnalisePage } from './pages/NovaAnalisePage'
+import { CampanhaPage } from './pages/CampanhaPage'
 import { ResultadoPage } from './pages/ResultadoPage'
 
 function PublicLoginRoute() {
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="/analises/nova" element={<NovaAnalisePage />} />
           <Route path="/analises/loading" element={<LoadingPage />} />
           <Route path="/analises/:id" element={<ResultadoPage />} />
+          <Route path="/campanhas/:id" element={<CampanhaPage />} />
           <Route path="/historico" element={<HistoricoPage />} />
         </Route>
       </Route>
