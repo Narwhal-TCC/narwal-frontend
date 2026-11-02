@@ -269,8 +269,8 @@ T8 → T9 → T10 → T11
 
 **Done when**:
 
-- [ ] Tests (react-leaflet mocked) for spec "Campaign map" AC 1-7
-- [ ] Gate check passes: `npm test`
+- [x] Tests (react-leaflet mocked) for spec "Campaign map" AC 1-7
+- [x] Gate check passes: `npm test`
 
 **Tests**: unit
 **Gate**: quick
