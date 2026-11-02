@@ -1,7 +1,12 @@
+import { Link } from 'react-router-dom'
 import type { AnalysisResult } from '../../api/analyses'
 import { classifyDetection, countMilco } from '../../domain/classification'
 import { shortId } from '../../domain/idDisplay'
 import { DetectionBadge } from './DetectionBadge'
+
+function formatCoordinate(value: number): string {
+  return value.toFixed(5)
+}
 
 function formatAnalysisDate(iso: string): string {
   return new Intl.DateTimeFormat('pt-BR', {
@@ -66,6 +71,10 @@ export function ResultadoMetricsTab({
   const detections = analysis.detections
   const milcoCount = countMilco(detections)
   const nomboCount = countNombo(detections)
+  const campaignLabel =
+    analysis.campaign?.name ?? analysis.campaign_name ?? null
+  const campaignId = analysis.campaign?.id
+  const location = analysis.location
 
   return (
     <div className="flex flex-col gap-5">
@@ -105,11 +114,33 @@ export function ResultadoMetricsTab({
               {formatAnalysisDate(analysis.created_at)}
             </dd>
           </div>
-          {analysis.campaign_name ? (
+          {campaignLabel ? (
             <div className="flex justify-between gap-4">
               <dt className="text-[color:var(--navi-muted)]">Campanha</dt>
               <dd className="text-right text-[color:var(--navi-text)]">
-                {analysis.campaign_name}
+                {campaignId ? (
+                  <Link
+                    to={`/campanhas/${campaignId}`}
+                    className="text-[color:var(--navi-link)] underline-offset-2 hover:underline"
+                  >
+                    {campaignLabel}
+                  </Link>
+                ) : (
+                  campaignLabel
+                )}
+              </dd>
+            </div>
+          ) : null}
+          {location ? (
+            <div className="flex justify-between gap-4">
+              <dt className="text-[color:var(--navi-muted)]">Posição</dt>
+              <dd className="text-right font-mono text-[color:var(--navi-text)]">
+                {formatCoordinate(location.lat)}, {formatCoordinate(location.lon)}
+                {location.source === 'simulated' ? (
+                  <span className="ml-2 rounded bg-[color:var(--navi-surface-tint)] px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[color:var(--navi-muted)]">
+                    simulado
+                  </span>
+                ) : null}
               </dd>
             </div>
           ) : null}

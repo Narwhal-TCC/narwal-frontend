@@ -221,8 +221,8 @@ T8 → T9 → T10 → T11
 
 **Done when**:
 
-- [ ] Tests for spec "Location on result" AC 1-2
-- [ ] Gate check passes: `npm test`
+- [x] Tests for spec "Location on result" AC 1-2
+- [x] Gate check passes: `npm test`
 
 **Tests**: unit
 **Gate**: quick
