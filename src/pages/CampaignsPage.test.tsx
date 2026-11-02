@@ -144,6 +144,36 @@ describe('CampaignsPage', () => {
     )
   })
 
+  it('shows backend error on 400 and keeps the form open', async () => {
+    vi.mocked(listCampaigns).mockResolvedValue([])
+    vi.mocked(createCampaign).mockRejectedValue(
+      new ApiError('VALIDATION_ERROR', 'Nome é obrigatório.', 400),
+    )
+
+    renderPage()
+
+    fireEvent.click(await screen.findByTestId('campaign-create-empty'))
+    fireEvent.change(screen.getByTestId('campaign-form-name'), {
+      target: { value: 'X' },
+    })
+    fireEvent.change(screen.getByTestId('campaign-form-min-lat'), {
+      target: { value: '1' },
+    })
+    fireEvent.change(screen.getByTestId('campaign-form-max-lat'), {
+      target: { value: '2' },
+    })
+    fireEvent.change(screen.getByTestId('campaign-form-min-lon'), {
+      target: { value: '3' },
+    })
+    fireEvent.change(screen.getByTestId('campaign-form-max-lon'), {
+      target: { value: '4' },
+    })
+    fireEvent.click(screen.getByTestId('campaign-form-submit'))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Nome é obrigatório.')
+    expect(screen.getByTestId('campaign-form-submit')).toBeInTheDocument()
+  })
+
   it('shows backend error on 409 and keeps the form open', async () => {
     vi.mocked(listCampaigns).mockResolvedValue([sampleCampaigns[1]])
     vi.mocked(updateCampaign).mockRejectedValue(

@@ -98,6 +98,34 @@ describe('campaigns API', () => {
     expect(JSON.parse(options?.body as string)).toEqual({ name: 'Renomeada' })
   })
 
+  it('updateCampaign throws ApiError with message from error body', async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(
+        JSON.stringify({ code: 'VALIDATION_ERROR', message: 'Nome inválido.' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      ),
+    )
+
+    await expect(updateCampaign('camp-1', { name: '' })).rejects.toMatchObject({
+      message: 'Nome inválido.',
+      status: 400,
+    } satisfies Partial<ApiError>)
+  })
+
+  it('getCampaign throws ApiError with message from error body', async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(
+        JSON.stringify({ code: 'CAMPAIGN_NOT_FOUND', message: 'Campanha ausente.' }),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      ),
+    )
+
+    await expect(getCampaign('missing')).rejects.toMatchObject({
+      message: 'Campanha ausente.',
+      status: 404,
+    } satisfies Partial<ApiError>)
+  })
+
   it('createCampaign throws ApiError with message from error body', async () => {
     vi.mocked(fetch).mockResolvedValue(
       new Response(

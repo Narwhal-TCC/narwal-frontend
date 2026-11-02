@@ -18,7 +18,7 @@ function PublicLoginRoute() {
   return <LoginPage />
 }
 
-function LegacyCampanhaRedirect() {
+export function LegacyCampanhaRedirect() {
   const { id } = useParams()
   return <Navigate to={`/campaigns/${id}`} replace />
 }
