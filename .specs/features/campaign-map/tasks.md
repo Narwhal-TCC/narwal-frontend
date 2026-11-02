@@ -101,8 +101,8 @@ T8 → T9 → T10 → T11
 
 **Done when**:
 
-- [ ] Tests assert paths `/api/campaigns` and `/api/campaigns/{id}/points`
-- [ ] Gate check passes: `npm test`
+- [x] Tests assert paths `/api/campaigns` and `/api/campaigns/{id}/points`
+- [x] Gate check passes: `npm test`
 
 **Tests**: unit
 **Gate**: quick
