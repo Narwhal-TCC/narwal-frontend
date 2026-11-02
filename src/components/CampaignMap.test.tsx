@@ -303,10 +303,22 @@ describe('CampaignMap', () => {
     ).toHaveTextContent('Posição simulada pelo sistema')
   })
 
-  it('does not render the footer class legend on the map page', () => {
+  it('shows a togglable map legend instead of the resultado footer legend', () => {
     renderMap([])
 
     expect(screen.queryByTestId('detection-class-legend')).not.toBeInTheDocument()
+    expect(screen.getByTestId('campaign-map-legend')).toBeInTheDocument()
+    expect(screen.getByTestId('campaign-map-legend')).toHaveTextContent('MILCO')
+    expect(screen.getByTestId('campaign-map-legend')).toHaveTextContent(
+      'Coord. simulada',
+    )
+
+    fireEvent.click(screen.getByTestId('campaign-map-legend-close'))
+    expect(screen.queryByTestId('campaign-map-legend')).not.toBeInTheDocument()
+    expect(screen.getByTestId('campaign-map-legend-open')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByTestId('campaign-map-legend-open'))
+    expect(screen.getByTestId('campaign-map-legend')).toBeInTheDocument()
   })
 
   it('renders grouped detections in the right sidebar', () => {

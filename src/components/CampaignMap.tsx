@@ -20,6 +20,7 @@ import {
 import type { Campaign, CampaignPoint } from '../api/campaigns'
 import { icoArrowRight, icoClock, icoMapPin } from '../assets'
 import { CampaignDetectionsSidebar } from './CampaignDetectionsSidebar'
+import { CampaignMapLegend } from './CampaignMapLegend'
 import {
   hasSimulatedData,
   heatLayerPoints,
@@ -364,7 +365,7 @@ export function CampaignMap({ campaign, points }: CampaignMapProps) {
 
         <div
           data-testid="campaign-map"
-          className="h-full min-h-0 flex-1 overflow-hidden bg-[color:var(--navi-image-bg)]"
+          className="relative h-full min-h-0 flex-1 overflow-hidden bg-[color:var(--navi-image-bg)]"
         >
           <MapContainer
             center={mapCenter}
@@ -431,6 +432,7 @@ export function CampaignMap({ campaign, points }: CampaignMapProps) {
             })}
             <HeatLayer points={visiblePoints} enabled={heatmapOn} />
           </MapContainer>
+          <CampaignMapLegend />
         </div>
 
         {points.length === 0 ? (
