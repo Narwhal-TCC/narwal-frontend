@@ -2,6 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import {
   icoGrid,
   icoHistory,
+  icoMapPin,
   icoSun,
   icoUpload,
   icoUser,
@@ -14,6 +15,7 @@ const navItems = [
   { to: '/', label: 'Visão geral', icon: icoGrid, end: true },
   { to: '/analises/nova', label: 'Nova análise', icon: icoUpload, end: false },
   { to: '/historico', label: 'Histórico', icon: icoHistory, end: false },
+  { to: '/campaigns', label: 'Campanhas', icon: icoMapPin, end: false },
 ] as const
 
 export function Sidebar() {

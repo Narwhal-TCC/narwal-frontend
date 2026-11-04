@@ -45,6 +45,7 @@ const sampleResponse = {
       lon: -9,
       location_source: 'simulated' as const,
       primary_class: 'MILCO' as const,
+      primary_confidence: 0.9,
       milco_detection_count: 1,
       detection_count: 1,
       created_at: '2026-01-01T00:00:00Z',
@@ -52,11 +53,11 @@ const sampleResponse = {
   ],
 }
 
-function renderPage(path = '/campanhas/camp-1') {
+function renderPage(path = '/campaigns/camp-1') {
   return render(
     <MemoryRouter initialEntries={[path]}>
       <Routes>
-        <Route path="/campanhas/:id" element={<CampanhaPage />} />
+        <Route path="/campaigns/:id" element={<CampanhaPage />} />
       </Routes>
     </MemoryRouter>,
   )

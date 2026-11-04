@@ -120,7 +120,7 @@ export function ResultadoMetricsTab({
               <dd className="text-right text-[color:var(--navi-text)]">
                 {campaignId ? (
                   <Link
-                    to={`/campanhas/${campaignId}`}
+                    to={`/campaigns/${campaignId}`}
                     className="text-[color:var(--navi-link)] underline-offset-2 hover:underline"
                   >
                     {campaignLabel}

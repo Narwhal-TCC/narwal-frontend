@@ -74,10 +74,7 @@ export function CampanhaPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-260px)] flex-col px-9 py-6">
-      <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.66px] text-[color:var(--navi-muted)]">
-        Campanha
-      </p>
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
       <CampaignMap campaign={data.campaign} points={data.points} />
     </div>
   )

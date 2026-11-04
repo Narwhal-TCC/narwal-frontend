@@ -242,7 +242,7 @@ export function HomePage() {
           }
           href={
             !isLoading && data.activeCampaign?.id
-              ? `/campanhas/${data.activeCampaign.id}`
+              ? `/campaigns/${data.activeCampaign.id}`
               : undefined
           }
         />

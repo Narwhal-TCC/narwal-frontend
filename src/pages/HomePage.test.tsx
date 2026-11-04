@@ -25,7 +25,7 @@ function renderHome(initialPath = '/') {
         <Route path="/" element={<HomePage />} />
         <Route path="/analises/nova" element={<div>Nova Análise Page</div>} />
         <Route path="/analises/:id" element={<div>Resultado Page</div>} />
-        <Route path="/campanhas/:id" element={<div>Campanha Page</div>} />
+        <Route path="/campaigns/:id" element={<div>Campanha Page</div>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -121,7 +121,7 @@ describe('HomePage', () => {
     renderHome()
 
     const link = await screen.findByRole('link', { name: 'Campanha Simulada' })
-    expect(link).toHaveAttribute('href', '/campanhas/camp-1')
+    expect(link).toHaveAttribute('href', '/campaigns/camp-1')
     expect(screen.queryByText('Santos 2026')).not.toBeInTheDocument()
   })
 

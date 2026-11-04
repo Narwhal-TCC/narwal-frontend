@@ -55,7 +55,7 @@ describe('ResultadoMetricsTab', () => {
     })
 
     const link = screen.getByRole('link', { name: 'Campanha Simulada - Costa da Prata' })
-    expect(link).toHaveAttribute('href', '/campanhas/camp-1')
+    expect(link).toHaveAttribute('href', '/campaigns/camp-1')
     expect(screen.getByText('38.76543, -9.87654')).toBeInTheDocument()
     expect(screen.queryByText('simulado')).not.toBeInTheDocument()
   })

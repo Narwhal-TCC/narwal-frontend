@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 import { ProtectedRoute } from './auth/ProtectedRoute'
 import { getAccessToken } from './auth/token'
 import { AppShell } from './layout/AppShell'
@@ -8,6 +8,7 @@ import { LoadingPage } from './pages/LoadingPage'
 import { LoginPage } from './pages/LoginPage'
 import { NovaAnalisePage } from './pages/NovaAnalisePage'
 import { CampanhaPage } from './pages/CampanhaPage'
+import { CampaignsPage } from './pages/CampaignsPage'
 import { ResultadoPage } from './pages/ResultadoPage'
 
 function PublicLoginRoute() {
@@ -15,6 +16,11 @@ function PublicLoginRoute() {
     return <Navigate to="/" replace />
   }
   return <LoginPage />
+}
+
+export function LegacyCampanhaRedirect() {
+  const { id } = useParams()
+  return <Navigate to={`/campaigns/${id}`} replace />
 }
 
 export default function App() {
@@ -27,7 +33,9 @@ export default function App() {
           <Route path="/analises/nova" element={<NovaAnalisePage />} />
           <Route path="/analises/loading" element={<LoadingPage />} />
           <Route path="/analises/:id" element={<ResultadoPage />} />
-          <Route path="/campanhas/:id" element={<CampanhaPage />} />
+          <Route path="/campaigns" element={<CampaignsPage />} />
+          <Route path="/campaigns/:id" element={<CampanhaPage />} />
+          <Route path="/campanhas/:id" element={<LegacyCampanhaRedirect />} />
           <Route path="/historico" element={<HistoricoPage />} />
         </Route>
       </Route>

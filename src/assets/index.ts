@@ -1,5 +1,7 @@
 import icoArrowRight from './ico-arrow-right.svg'
 import icoClock from './ico-clock.svg'
+import icoEye from './ico-eye.svg'
+import icoEyeOff from './ico-eye-off.svg'
 import icoGrid from './ico-grid.svg'
 import icoHistory from './ico-history.svg'
 import icoMapPin from './ico-map-pin.svg'
@@ -13,6 +15,8 @@ import waveBg from './wave-bg.svg'
 export {
   icoArrowRight,
   icoClock,
+  icoEye,
+  icoEyeOff,
   icoGrid,
   icoHistory,
   icoMapPin,

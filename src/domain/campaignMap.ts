@@ -92,6 +92,84 @@ export function campaignAreaBounds(
   ]
 }
 
+function boundsFromPoints(
+  points: CampaignPoint[],
+): [[number, number], [number, number]] {
+  let minLat = points[0].lat
+  let maxLat = points[0].lat
+  let minLon = points[0].lon
+  let maxLon = points[0].lon
+
+  for (let index = 1; index < points.length; index += 1) {
+    const point = points[index]
+    minLat = Math.min(minLat, point.lat)
+    maxLat = Math.max(maxLat, point.lat)
+    minLon = Math.min(minLon, point.lon)
+    maxLon = Math.max(maxLon, point.lon)
+  }
+
+  const latSpan = maxLat - minLat
+  const lonSpan = maxLon - minLon
+  const latPad = Math.max(0.025, latSpan * 0.25 || 0.05)
+  const lonPad = Math.max(0.025, lonSpan * 0.25 || 0.05)
+
+  return [
+    [minLat - latPad, minLon - lonPad],
+    [maxLat + latPad, maxLon + lonPad],
+  ]
+}
+
+/** Fit the viewport to markers; for compact campaign areas, include the survey box too. */
+export function mapViewBounds(
+  campaign: Campaign,
+  points: CampaignPoint[],
+): [[number, number], [number, number]] {
+  if (points.length === 0) {
+    return campaignAreaBounds(campaign)
+  }
+
+  const pointBounds = boundsFromPoints(points)
+  const area = campaignAreaBounds(campaign)
+  const areaLatSpan = area[1][0] - area[0][0]
+  const areaLonSpan = area[1][1] - area[0][1]
+  const compactArea = areaLatSpan <= 1.5 && areaLonSpan <= 1.5
+
+  if (!compactArea) {
+    return pointBounds
+  }
+
+  return [
+    [
+      Math.min(area[0][0], pointBounds[0][0]),
+      Math.min(area[0][1], pointBounds[0][1]),
+    ],
+    [
+      Math.max(area[1][0], pointBounds[1][0]),
+      Math.max(area[1][1], pointBounds[1][1]),
+    ],
+  ]
+}
+
+export function formatPointCoordinates(lat: number, lon: number): string {
+  return `${lat.toFixed(5)}, ${lon.toFixed(5)}`
+}
+
+export function formatPrimaryConfidence(confidence: number | null): string {
+  if (confidence == null || Number.isNaN(confidence)) {
+    return '—'
+  }
+  return `${Math.round(confidence * 100)}% conf.`
+}
+
+export function formatDetectionRowSubtitle(point: CampaignPoint): string {
+  const counts = `${point.detection_count} detecções · MILCO ${point.milco_detection_count}`
+  const confidence = formatPrimaryConfidence(point.primary_confidence)
+  if (confidence === '—') {
+    return counts
+  }
+  return `${confidence} · ${counts}`
+}
+
 export function markerPathOptions(
   primaryClass: PrimaryClass | null,
   locationSource: LocationSource,

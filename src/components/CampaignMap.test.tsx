@@ -11,9 +11,13 @@ const leafletMocks = vi.hoisted(() => {
   const heatLayer = vi.fn(() => ({ addTo: addLayer }))
   return {
     fitBounds: vi.fn(),
+    flyTo: vi.fn(),
+    getZoom: vi.fn(() => 10),
+    invalidateSize: vi.fn(),
     addLayer,
     removeLayer: vi.fn(),
     heatLayer,
+    openPopup: vi.fn(),
   }
 })
 
@@ -32,6 +36,7 @@ vi.mock('react-leaflet', () => ({
   MapContainer: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="map-container">{children}</div>
   ),
+  ZoomControl: () => <div data-testid="zoom-control" />,
   TileLayer: () => {
     const [tileError, setTileError] = useState(false)
     useEffect(() => {
@@ -48,24 +53,51 @@ vi.mock('react-leaflet', () => ({
     center,
     pathOptions,
     children,
+    eventHandlers,
+    ref: markerRef,
+    radius,
   }: {
     center: [number, number]
     pathOptions: Record<string, unknown>
     children?: React.ReactNode
-  }) => (
-    <div
-      data-testid="map-marker"
-      data-center={JSON.stringify(center)}
-      data-path={JSON.stringify(pathOptions)}
-    >
-      {children}
-    </div>
-  ),
+    eventHandlers?: { click?: () => void }
+    ref?: (layer: { openPopup: () => void } | null) => void
+    radius?: number
+  }) => {
+    useEffect(() => {
+      if (typeof markerRef === 'function') {
+        markerRef({ openPopup: leafletMocks.openPopup })
+      }
+    }, [markerRef])
+    return (
+      <div
+        data-testid="map-marker"
+        data-center={JSON.stringify(center)}
+        data-path={JSON.stringify(pathOptions)}
+        data-radius={radius}
+        onClick={() => eventHandlers?.click?.()}
+      >
+        {children}
+      </div>
+    )
+  },
   Popup: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="map-popup">{children}</div>
   ),
   useMap: () => ({
     fitBounds: leafletMocks.fitBounds,
+    flyTo: leafletMocks.flyTo,
+    getZoom: leafletMocks.getZoom,
+    invalidateSize: leafletMocks.invalidateSize,
+    whenReady: (callback: () => void) => {
+      callback()
+    },
+    getContainer: () => {
+      const element = document.createElement('div')
+      Object.defineProperty(element, 'offsetWidth', { value: 640 })
+      Object.defineProperty(element, 'offsetHeight', { value: 480 })
+      return element
+    },
     addLayer: leafletMocks.addLayer,
     removeLayer: leafletMocks.removeLayer,
   }),
@@ -86,6 +118,7 @@ const enteredMilco: CampaignPoint = {
   lon: -9.4,
   location_source: 'entered',
   primary_class: 'MILCO',
+  primary_confidence: 0.92,
   milco_detection_count: 2,
   detection_count: 3,
   created_at: '2026-01-20T14:30:00Z',
@@ -97,6 +130,7 @@ const simulatedNombo: CampaignPoint = {
   lon: -9.35,
   location_source: 'simulated',
   primary_class: 'NOMBO',
+  primary_confidence: 0.81,
   milco_detection_count: 0,
   detection_count: 1,
   created_at: '2026-01-21T10:00:00Z',
@@ -122,6 +156,8 @@ describe('CampaignMap', () => {
     leafletMocks.addLayer.mockClear()
     leafletMocks.removeLayer.mockClear()
     leafletMocks.fitBounds.mockClear()
+    leafletMocks.flyTo.mockClear()
+    leafletMocks.openPopup.mockClear()
   })
 
   it('draws the campaign area and one marker per point', () => {
@@ -267,9 +303,70 @@ describe('CampaignMap', () => {
     ).toHaveTextContent('Posição simulada pelo sistema')
   })
 
-  it('does not render the footer class legend on the map page', () => {
+  it('shows a togglable map legend instead of the resultado footer legend', () => {
     renderMap([])
 
     expect(screen.queryByTestId('detection-class-legend')).not.toBeInTheDocument()
+    expect(screen.getByTestId('campaign-map-legend')).toBeInTheDocument()
+    const legend = screen.getByTestId('campaign-map-legend')
+    expect(legend).toHaveTextContent('Classes')
+    expect(legend).toHaveTextContent('Geometria e origem')
+    expect(legend).toHaveTextContent('MILCO')
+    expect(legend).toHaveTextContent('Coord. simulada')
+    expect(legend).toHaveTextContent('(Contorno)')
+    expect(legend).toHaveTextContent('(Preenchido)')
+
+    fireEvent.click(screen.getByTestId('campaign-map-legend-close'))
+    expect(screen.queryByTestId('campaign-map-legend')).not.toBeInTheDocument()
+    expect(screen.getByTestId('campaign-map-legend-open')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByTestId('campaign-map-legend-open'))
+    expect(screen.getByTestId('campaign-map-legend')).toBeInTheDocument()
   })
+
+  it('renders grouped detections in the right sidebar', () => {
+    renderMap()
+
+    expect(screen.getByTestId('campaign-detections-sidebar')).toBeInTheDocument()
+    expect(screen.getByTestId('class-group-MILCO')).toBeInTheDocument()
+    expect(screen.getByTestId('class-group-NOMBO')).toBeInTheDocument()
+    expect(
+      screen.getByTestId(`detection-row-coords-${enteredMilco.analysis_id}`),
+    ).toHaveTextContent('38.50000, -9.40000')
+    expect(
+      screen.getByTestId(
+        `detection-row-subtitle-${enteredMilco.analysis_id}`,
+      ),
+    ).toHaveTextContent('92% conf. · 3 detecções · MILCO 2')
+  })
+
+  it('hides markers when a class visibility toggle is off', () => {
+    renderMap()
+
+    fireEvent.click(screen.getByTestId('class-visibility-MILCO'))
+    expect(screen.getAllByTestId('map-marker')).toHaveLength(1)
+    const center = JSON.parse(
+      screen.getByTestId('map-marker').getAttribute('data-center') ?? '[]',
+    )
+    expect(center).toEqual([simulatedNombo.lat, simulatedNombo.lon])
+  })
+
+  it('flies to a point when a visible row is selected', () => {
+    renderMap()
+
+    fireEvent.click(
+      screen.getByTestId(`detection-row-${enteredMilco.analysis_id}`),
+    )
+
+    expect(leafletMocks.flyTo).toHaveBeenCalledWith(
+      [enteredMilco.lat, enteredMilco.lon],
+      14,
+      { duration: 0.4 },
+    )
+    expect(leafletMocks.openPopup).toHaveBeenCalled()
+    expect(
+      screen.getByTestId(`detection-row-${enteredMilco.analysis_id}`),
+    ).toHaveAttribute('data-selected', 'true')
+  })
+
 })
