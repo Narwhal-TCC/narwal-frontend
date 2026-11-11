@@ -7,7 +7,7 @@ export interface EndToEndConfusionRow {
 }
 
 export interface ModelBenchmark {
-  /** Resumo curto exibido abaixo do seletor de modelo */
+  /** Resumo curto exibido na aba Modelo do resultado */
   summary: string
   /** Orientação em linguagem clara para o operador */
   narrative: string

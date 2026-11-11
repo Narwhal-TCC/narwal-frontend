@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import type { AnalysisResult } from '../../api/analyses'
-import { useModels } from '../../models/useModels'
 import { ResultadoExplainTab } from './ResultadoExplainTab'
 import { ResultadoMetricsTab } from './ResultadoMetricsTab'
+import { ResultadoModelTab } from './ResultadoModelTab'
 
-type ResultadoTab = 'metricas' | 'explicacao'
+type ResultadoTab = 'metricas' | 'modelo' | 'explicacao'
 
 interface ResultadoSidePanelProps {
   analysis: AnalysisResult
@@ -18,20 +18,9 @@ export function ResultadoSidePanel({
   onHighlightDetection,
 }: ResultadoSidePanelProps) {
   const [activeTab, setActiveTab] = useState<ResultadoTab>('metricas')
-  const { labelFor } = useModels()
-  const modelLabel = labelFor(analysis.model_id)
 
   return (
     <div className="flex max-h-[70vh] flex-col overflow-hidden rounded-[10px] border border-[color:var(--navi-border-subtle)] bg-[color:var(--navi-panel)]">
-      {modelLabel ? (
-        <p
-          data-testid="analysis-model-label"
-          className="shrink-0 border-b border-[color:var(--navi-border-subtle)] px-5 py-3 text-sm text-[color:var(--navi-text)]"
-        >
-          <span className="text-[color:var(--navi-muted)]">Modelo: </span>
-          {modelLabel}
-        </p>
-      ) : null}
       <div
         role="tablist"
         aria-label="Painel de resultado"
@@ -40,6 +29,7 @@ export function ResultadoSidePanel({
         {(
           [
             { id: 'metricas' as const, label: 'Métricas' },
+            { id: 'modelo' as const, label: 'Modelo' },
             { id: 'explicacao' as const, label: 'Explicação' },
           ] as const
         ).map(({ id, label }) => {
@@ -78,6 +68,8 @@ export function ResultadoSidePanel({
             highlightedDetectionIndex={highlightedDetectionIndex}
             onHighlightDetection={onHighlightDetection}
           />
+        ) : activeTab === 'modelo' ? (
+          <ResultadoModelTab analysis={analysis} />
         ) : (
           <ResultadoExplainTab
             aiAnalysis={analysis.ai_analysis}

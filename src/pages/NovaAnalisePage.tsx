@@ -6,11 +6,6 @@ import { listCampaigns, type Campaign } from '../api/campaigns'
 import { ApiError } from '../api/client'
 import { validateUploadFile } from '../domain/uploadValidation'
 import { useModels } from '../models/useModels'
-import { ModelConfusionMatrix } from '../components/ModelConfusionMatrix'
-import {
-  benchmarkForModel,
-  classifierBenchmarkForModel,
-} from '../domain/modelBenchmarks'
 import { setPendingUploadFile } from '../upload/pendingFile'
 
 const FIELD_CLASS =
@@ -87,15 +82,6 @@ export function NovaAnalisePage() {
   const noCampaigns = !campaignsLoading && campaigns.length === 0 && !campaignsError
   const submitBlocked =
     campaignsLoading || noCampaigns || campaignsError !== null
-  const selectedModel = models.find((m) => m.id === selectedModelId)
-  const selectedBenchmark = selectedModelId
-    ? benchmarkForModel(selectedModelId)
-    : null
-  const selectedClassifierBenchmark =
-    selectedModelId && !selectedBenchmark
-      ? classifierBenchmarkForModel(selectedModelId)
-      : null
-
   const handleFile = (file: File | null) => {
     if (!file) return
     const validationError = validateUploadFile(file)
@@ -241,31 +227,6 @@ export function NovaAnalisePage() {
                   ))
                 )}
               </select>
-              {selectedModel && !catalogFailed ? (
-                <div className="pt-3">
-                  <p className="text-[13px] leading-[20px] text-[color:var(--navi-text)]">
-                    {selectedBenchmark?.summary ??
-                      selectedClassifierBenchmark?.summary ??
-                      selectedModel.description}
-                  </p>
-                  {selectedClassifierBenchmark ? (
-                    <p className="pt-2 text-[13px] leading-[20px] text-[color:var(--navi-muted)]">
-                      {selectedClassifierBenchmark.narrative}
-                    </p>
-                  ) : selectedBenchmark ? (
-                    <>
-                      <p className="pt-2 text-[13px] leading-[20px] text-[color:var(--navi-muted)]">
-                        {selectedBenchmark.narrative}
-                      </p>
-                      <ModelConfusionMatrix benchmark={selectedBenchmark} />
-                    </>
-                  ) : (
-                    <p className="pt-2 text-[13px] leading-[20px] text-[color:var(--navi-muted)]">
-                      {selectedModel.description}
-                    </p>
-                  )}
-                </div>
-              ) : null}
             </div>
           </div>
 

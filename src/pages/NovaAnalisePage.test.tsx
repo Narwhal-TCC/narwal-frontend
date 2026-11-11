@@ -361,39 +361,23 @@ describe('NovaAnalisePage', () => {
     })
   })
 
-  it('preselects the default model and shows its description', async () => {
+  it('preselects the default model without benchmark details on the upload form', async () => {
     renderNova()
 
     const select = screen.getByLabelText('Modelo') as HTMLSelectElement
     await waitFor(() => {
       expect(select.value).toBe('yolo-convnext-balanced')
     })
-    expect(
-      screen.getByText('53 de 75 minas localizadas · 11 falsos alarmes'),
-    ).toBeInTheDocument()
-    expect(screen.getByText('Detalhe na avaliação de referência')).toBeInTheDocument()
     expect(select).toHaveTextContent('YOLO + ConvNeXt (equilibrado)')
-  })
-
-  it('updates description when another model is selected', async () => {
-    renderNova()
-
-    const select = screen.getByLabelText('Modelo')
-    await waitFor(() => {
-      expect(select).toHaveValue('yolo-convnext-balanced')
-    })
-
-    fireEvent.change(select, { target: { value: 'yolo-convnext-recall' } })
-
-    expect(
-      screen.getByText('58 de 75 minas localizadas · 25 falsos alarmes'),
-    ).toBeInTheDocument()
     expect(
       screen.queryByText('53 de 75 minas localizadas · 11 falsos alarmes'),
     ).not.toBeInTheDocument()
+    expect(
+      screen.queryByText('Detalhe na avaliação de referência'),
+    ).not.toBeInTheDocument()
   })
 
-  it('shows fusion v3 benchmark and confusion matrix when selected', async () => {
+  it('keeps benchmark details off the upload form when the model changes', async () => {
     renderNova()
 
     const select = screen.getByLabelText('Modelo')
@@ -404,29 +388,9 @@ describe('NovaAnalisePage', () => {
     fireEvent.change(select, { target: { value: 'yolo-fusion-v3' } })
 
     expect(
-      screen.getByText('50 de 75 minas localizadas · 21 falsos alarmes'),
-    ).toBeInTheDocument()
-    expect(screen.getByText('Detalhe na avaliação de referência')).toBeInTheDocument()
-  })
-
-  it('shows classifier-only summary without confusion matrix for mobilevit fusion', async () => {
-    renderNova()
-
-    const select = screen.getByLabelText('Modelo')
-    await waitFor(() => {
-      expect(select).toHaveValue('yolo-convnext-balanced')
-    })
-
-    fireEvent.change(select, { target: { value: 'yolo-fusion-mobilevit' } })
-
-    expect(
-      screen.getByText(
-        'Classificador: 72 de 75 MILCO e 25 de 34 NOMBO corretos nos recortes de teste',
-      ),
-    ).toBeInTheDocument()
-    expect(
-      screen.queryByText('Detalhe na avaliação de referência'),
+      screen.queryByText('50 de 75 minas localizadas · 21 falsos alarmes'),
     ).not.toBeInTheDocument()
+    expect(select).toHaveValue('yolo-fusion-v3')
   })
 
   it('disables the select with Modelo padrão when catalog fails', async () => {
