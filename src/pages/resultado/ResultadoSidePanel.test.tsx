@@ -19,11 +19,45 @@ vi.mock('../../models/useModels', () => ({
 
 import { useModels } from '../../models/useModels'
 
-const CATALOG_LABELS: Record<string, string> = {
-  'yolo-convnext-balanced': 'YOLO + ConvNeXt (equilibrado)',
-  'yolo-convnext-recall': 'YOLO + ConvNeXt (recall)',
-  'two-stage-pt': 'RetinaNet + fusão (PyTorch)',
-}
+const CATALOG = [
+  {
+    id: 'yolo-convnext-balanced',
+    label: 'YOLO + ConvNeXt (equilibrado)',
+    description:
+      'Recomendado no dia a dia: equilibra achar minas e limitar falsos alarmes.',
+    is_default: true,
+  },
+  {
+    id: 'yolo-convnext-recall',
+    label: 'YOLO + ConvNeXt (recall)',
+    description:
+      'Prioriza não deixar minas passarem; tende a gerar mais pontos para revisar.',
+    is_default: false,
+  },
+  {
+    id: 'yolo-fusion-v3',
+    label: 'YOLO A + fusão ConvNeXt/EdgeNeXt (v3)',
+    description: 'Variação mais nova do detector.',
+    is_default: false,
+  },
+  {
+    id: 'yolo-fusion-mobilevit',
+    label: 'YOLO A + fusão ConvNeXt/MobileViTv2',
+    description:
+      'Mesmo detector da v3, com classificador ConvNeXt + MobileViTv2 nos recortes.',
+    is_default: false,
+  },
+  {
+    id: 'two-stage-pt',
+    label: 'RetinaNet + fusão (PyTorch)',
+    description: 'Versão anterior.',
+    is_default: false,
+  },
+]
+
+const CATALOG_LABELS: Record<string, string> = Object.fromEntries(
+  CATALOG.map((m) => [m.id, m.label]),
+)
 
 const baseAnalysis: AnalysisResult = {
   id: '01234567-89ab-cdef-0123-456789abcdef',
@@ -44,36 +78,77 @@ describe('ResultadoSidePanel', () => {
   beforeEach(() => {
     vi.mocked(ResultadoExplainTab).mockClear()
     vi.mocked(useModels).mockReturnValue({
-      models: [],
-      defaultId: null,
+      models: CATALOG,
+      defaultId: 'yolo-convnext-balanced',
       labelFor: (id) => (id ? (CATALOG_LABELS[id] ?? id) : ''),
       error: null,
       isLoading: false,
     })
   })
 
-  it('shows catalog label for a known model_id', () => {
+  it('shows catalog label for a known model_id on the Modelo tab', () => {
     render(
       <ResultadoSidePanel
         analysis={{ ...baseAnalysis, model_id: 'yolo-convnext-recall' }}
       />,
     )
 
+    fireEvent.click(screen.getByRole('tab', { name: 'Modelo' }))
+
     expect(screen.getByTestId('analysis-model-label')).toHaveTextContent(
       'YOLO + ConvNeXt (recall)',
     )
+    expect(
+      screen.getByText('58 de 75 minas localizadas · 25 falsos alarmes'),
+    ).toBeInTheDocument()
   })
 
-  it('shows raw model_id when id is not in the catalog', () => {
+  it('shows raw model_id when id is not in the catalog on the Modelo tab', () => {
     render(
       <ResultadoSidePanel
         analysis={{ ...baseAnalysis, model_id: 'legacy-unknown-id' }}
       />,
     )
 
+    fireEvent.click(screen.getByRole('tab', { name: 'Modelo' }))
+
     expect(screen.getByTestId('analysis-model-label')).toHaveTextContent(
       'legacy-unknown-id',
     )
+  })
+
+  it('shows fusion v3 benchmark and confusion matrix on the Modelo tab', () => {
+    render(
+      <ResultadoSidePanel
+        analysis={{ ...baseAnalysis, model_id: 'yolo-fusion-v3' }}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Modelo' }))
+
+    expect(
+      screen.getByText('50 de 75 minas localizadas · 21 falsos alarmes'),
+    ).toBeInTheDocument()
+    expect(screen.getByText('Detalhe na avaliação de referência')).toBeInTheDocument()
+  })
+
+  it('shows classifier-only summary without confusion matrix for mobilevit on Modelo tab', () => {
+    render(
+      <ResultadoSidePanel
+        analysis={{ ...baseAnalysis, model_id: 'yolo-fusion-mobilevit' }}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Modelo' }))
+
+    expect(
+      screen.getByText(
+        'Classificador: 72 de 75 MILCO e 25 de 34 NOMBO corretos nos recortes de teste',
+      ),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByText('Detalhe na avaliação de referência'),
+    ).not.toBeInTheDocument()
   })
 
   it('defaults to Métricas tab and shows metrics content', () => {
